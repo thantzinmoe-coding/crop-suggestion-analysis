@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Mail, Lock, ArrowRight, Loader2, AlertCircle, X, UserRound, Leaf } from 'lucide-react'
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle, X, UserRound } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
+import GreenVistaMark from './GreenVistaMark.jsx'
 
 export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }) {
   const [mode, setMode] = useState(initialMode)
@@ -68,6 +69,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
         <button 
           type="button" 
           onClick={onClose} 
+          aria-label="Close authentication dialog"
           className="absolute right-5 top-5 grid h-10 w-10 place-items-center rounded-xl text-slate-500 transition hover:bg-myanglow-sage/40 hover:text-myanglow-navy"
         >
           <X size={19} />
@@ -75,7 +77,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
 
         <div className="relative">
           <div className="grid h-12 w-12 place-items-center rounded-2xl bg-myanglow-forest text-white shadow-lg shadow-myanglow-forest/20">
-            <Leaf size={22} />
+            <GreenVistaMark className="h-8 w-8" />
           </div>
           
           <h2 className="mt-5 text-3xl font-semibold text-myanglow-navy">
@@ -85,8 +87,8 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             {mode === 'signin' 
-              ? (t('auth.loginSubtitle') || 'Sign in to access your AgroGuard dashboard')
-              : (t('auth.registerSubtitle') || 'Join AgroGuard and start managing your farm')}
+              ? (t('auth.loginSubtitle') || 'Sign in to access your GreenVista dashboard')
+              : (t('auth.registerSubtitle') || 'Join GreenVista and start managing your farm')}
           </p>
 
           <div className="mt-6 grid grid-cols-2 rounded-2xl bg-myanglow-sage/35 p-1">
@@ -123,7 +125,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="farmer@agroguard.com" 
+                  placeholder="farmer@greenvista.com" 
                   className="w-full border-0 bg-transparent py-3.5 text-sm font-normal outline-none" 
                   disabled={loading}
                 />

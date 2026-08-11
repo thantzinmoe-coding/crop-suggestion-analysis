@@ -4,7 +4,7 @@ from httpx import AsyncClient, HTTPStatusError, RequestError
 
 from app.core.config import get_settings
 
-SYSTEM_PROMPT_EN = """You are AgroGuard, an expert AI agricultural assistant for Myanmar (Burma).
+SYSTEM_PROMPT_EN = """You are GreenVista, an expert AI agricultural assistant for Myanmar (Burma).
 Provide helpful, accurate, and concise advice about:
 - Crop selection and farming best practices for Myanmar's climate zones
 - Soil management and irrigation
@@ -14,7 +14,7 @@ Provide helpful, accurate, and concise advice about:
 Keep responses EXTREMELY brief, practical, and actionable (maximum 2-3 short sentences).
 Answer in English."""
 
-SYSTEM_PROMPT_MY = """သင်သည် မြန်မာနိုင်ငံအတွက် စိုက်ပျိုးရေးဆိုင်ရာ ကျွမ်းကျင် AI အကူအညီပေးသူ AgroGuard ဖြစ်ပါသည်။
+SYSTEM_PROMPT_MY = """သင်သည် မြန်မာနိုင်ငံအတွက် စိုက်ပျိုးရေးဆိုင်ရာ ကျွမ်းကျင် AI အကူအညီပေးသူ GreenVista ဖြစ်ပါသည်။
 အောက်ပါကိစ္စများအတွက် အထောက်အကူဖြစ်စေမည့် တိကျမှန်ကန်ပြီး လက်တွေ့ကျသော အကြံဉာဏ်များကို ပေးပါ-
 - မြန်မာနိုင်ငံ၏ ရာသီဥတုဇုန်များအတွက် သီးနှံရွေးချယ်မှုနှင့် စိုက်ပျိုးရေးအကောင်းဆုံးနည်းလမ်းများ
 - မြေဆီလွှာစီမံခန့်ခွဲမှုနှင့် ဆည်မြောင်း
@@ -62,6 +62,10 @@ async def stream_chat(
     settings = get_settings()
     api_key = settings.llm_api_key.get_secret_value() if settings.llm_api_key else None
 
+    if not api_key:
+        yield _fallback_chat_response(messages, language)
+        return
+
     url = f"{settings.llm_endpoint.rstrip('/')}/chat/completions"
     headers = {
         "Content-Type": "application/json",
@@ -101,9 +105,9 @@ async def stream_chat(
 def _fallback_chat_response(messages: list[dict], language: str) -> str:
     user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
     if language == "my":
-        return f"ကျေးဇူးပြု၍ AgroGuard API ကို အသုံးပြုရန်အတွက် LLM API သော့ကို သတ်မှတ်ပါ။\n\nမေးခွန်း- {user_msg}"
+        return f"ကျေးဇူးပြု၍ GreenVista API ကို အသုံးပြုရန်အတွက် LLM API သော့ကို သတ်မှတ်ပါ။\n\nမေးခွန်း- {user_msg}"
     return (
-        f"AgroGuard requires an LLM API key to function. "
+        f"GreenVista requires an LLM API key to function. "
         f"Please set the `AGROGUARD_LLM_API_KEY` environment variable.\n\n"
         f"Your question was: {user_msg}"
     )
@@ -118,6 +122,10 @@ async def stream_crop_explanation(
 ) -> AsyncGenerator[str, None]:
     settings = get_settings()
     api_key = settings.llm_api_key.get_secret_value() if settings.llm_api_key else None
+
+    if not api_key:
+        yield _fallback_crop_explanation(crop, language)
+        return
 
     prompt_template = CROP_EXPLANATION_PROMPT_MY if language == "my" else CROP_EXPLANATION_PROMPT_EN
     user_prompt = prompt_template.format(

@@ -1,2 +1,2 @@
-"""AgroGuard backend test package."""
+"""GreenVista backend test package."""
 

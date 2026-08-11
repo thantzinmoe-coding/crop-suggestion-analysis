@@ -252,6 +252,95 @@ export default function CropSuggestion() {
 
   return (
     <div className="crop-suggestion">
+      <section className="crop-page-hero" aria-labelledby="crop-page-title">
+        <div className="crop-page-hero-copy">
+          <p className="crop-page-eyebrow"><Sparkles size={15} /> Smart crop planning</p>
+          <h1 id="crop-page-title">
+            {language === 'my' ? 'သင့်လယ်ကွင်းအတွက် သင့်တော်သော သီးနှံကို ရွေးချယ်ပါ။' : 'Choose what grows best here.'}
+          </h1>
+          <p>{t('crop.subtitle')}</p>
+          <div className="crop-page-benefits" aria-label="Planner benefits">
+            <span><Satellite size={16} /> Satellite weather</span>
+            <span><LandPlot size={16} /> Local conditions</span>
+            <span><Sprout size={16} /> Practical guidance</span>
+          </div>
+        </div>
+        <Sprout className="crop-page-hero-art" size={250} strokeWidth={0.7} aria-hidden="true" />
+      </section>
+
+      <div className="crop-planner-grid">
+        <section className="crop-planner-card crop-source-card" aria-labelledby="crop-source-title">
+          <header className="crop-card-heading">
+            <span>01</span>
+            <div><p>Field data</p><h2 id="crop-source-title">Choose your data source</h2></div>
+          </header>
+
+          <div className="mode-toggle crop-mode-toggle">
+            <button type="button" className={mode === 'auto' ? 'active' : ''} onClick={() => setMode('auto')}><Satellite size={16} /> {t('loc.autoMode')}</button>
+            <button type="button" className={mode === 'manual' ? 'active' : ''} onClick={() => setMode('manual')}><FlaskConical size={16} /> {t('loc.manualMode')}</button>
+          </div>
+
+          {mode === 'auto' ? (
+            <div className="crop-source-action">
+              <div className="crop-source-intro">
+                <MapPin size={22} aria-hidden="true" />
+                <div><strong>Use current field location</strong><p>Retrieve regional weather conditions from your coordinates.</p></div>
+              </div>
+              <button className="detect-btn" type="button" onClick={detectLocation} disabled={locStatus === 'detecting' || locStatus === 'fetching'}>
+                {locStatus === 'detecting' && <><span className="spinner" /> {t('loc.detecting')}</>}
+                {locStatus === 'fetching' && <><span className="spinner" /> {t('loc.fetchWeather')}</>}
+                {(locStatus === 'idle' || locStatus === 'error' || locStatus === 'done') && <><MapPin size={17} /> {t('loc.detect')}</>}
+              </button>
+              {locError && <p className="crop-location-error" role="alert">{locError}</p>}
+
+              {weatherData && (
+                <div className="crop-weather-summary">
+                  <div className="region-badge"><MapPin size={16} />{language === 'my' ? weatherData.region.name_my : weatherData.region.name_en}</div>
+                  <div className="weather-grid">
+                    <div className="weather-card"><ThermometerSun size={20} /><div className="weather-label">{t('loc.currentTemp')}</div><div className="weather-value">{weatherData.current.temperature_c}<span className="weather-unit">°C</span></div></div>
+                    <div className="weather-card"><Droplets size={20} /><div className="weather-label">{t('loc.rain7d')}</div><div className="weather-value">{weatherData.current.rainfall_7d_mm}<span className="weather-unit">mm</span></div></div>
+                    {weatherData.current.humidity_pct && <div className="weather-card"><Droplets size={20} /><div className="weather-label">{t('loc.humidity')}</div><div className="weather-value">{weatherData.current.humidity_pct}<span className="weather-unit">%</span></div></div>}
+                    <div className="weather-card"><FlaskConical size={20} /><div className="weather-label">{t('loc.soilPh')}</div><div className="weather-value">{weatherData.current.soil_pH_estimate}</div></div>
+                  </div>
+                  <span className="data-source-tag"><Satellite size={12} /> {t('loc.source')}</span>
+                  <p className="crop-weather-note">{t('loc.phNote')}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="crop-manual-note"><FlaskConical size={22} aria-hidden="true" /><div><strong>Use your own measurements</strong><p>Enter recent soil and weather readings in the next step.</p></div></div>
+          )}
+        </section>
+
+        <form onSubmit={handleSubmit} className="crop-planner-card crop-web-form" aria-labelledby="crop-conditions-title">
+          <header className="crop-card-heading">
+            <span>02</span>
+            <div><p>Growing conditions</p><h2 id="crop-conditions-title">Review your field</h2></div>
+          </header>
+          {mode === 'auto' && weatherData && <p className="crop-form-note">{t('loc.override')}</p>}
+          <div className="form-group"><label htmlFor="soil-pH"><FlaskConical size={17} /> {t('crop.soilPh')}</label><input id="soil-pH" type="number" name="soil_pH" step="0.1" value={formData.soil_pH} onChange={handleChange} required /></div>
+          <div className="form-group"><label htmlFor="rainfall"><Droplets size={17} /> {t('crop.rainfall')}</label><input id="rainfall" type="number" name="rainfall_mm" step="1" value={formData.rainfall_mm} onChange={handleChange} required /></div>
+          <div className="form-group"><label htmlFor="temperature"><ThermometerSun size={17} /> {t('crop.temp')}</label><input id="temperature" type="number" name="temperature_c" step="0.1" value={formData.temperature_c} onChange={handleChange} required /></div>
+          <button type="submit" className="btn btn-primary crop-suggestion-submit" disabled={loading || explaining}><Sprout size={18} />{loading ? t('crop.analyzing') : t('crop.suggestBtn')}</button>
+          {error && <p className="crop-suggestion-error" role="alert">{error}</p>}
+        </form>
+      </div>
+
+      {weatherData && weatherData.advisories?.length > 0 && mode === 'auto' && (
+        <section className="crop-advisories-section">
+          <header><Lightbulb size={21} /><div><p>Based on current conditions</p><h2>{t('loc.advisories')}</h2></div></header>
+          <div className="advisories-container">
+            {weatherData.advisories.map((adv, idx) => (
+              <div key={idx} className={`advisory-card ${adv.severity}`}>
+                <div className="advisory-icon"><AdvisoryIcon severity={adv.severity} /></div>
+                <div className="advisory-content"><div className="advisory-title">{language === 'my' ? adv.title_my : adv.title_en}</div><div className="advisory-message">{language === 'my' ? adv.message_my : adv.message_en}</div></div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div hidden>
       <h2 className="m-0 text-xl font-semibold">{t('crop.title')}</h2>
       <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
         {t('crop.subtitle')}
@@ -463,6 +552,7 @@ export default function CropSuggestion() {
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {suggestion && selectedRecommendation && (

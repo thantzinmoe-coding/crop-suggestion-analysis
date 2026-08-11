@@ -35,6 +35,16 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid #e2a92b;
+  outline-offset: 3px;
+}
+
 #root {
   min-height: 100vh;
 }

@@ -1,6 +1,6 @@
-# AgroGuard FastAPI Backend
+# GreenVista FastAPI Backend
 
-This folder contains the initial FastAPI backend scaffold for AgroGuard. It provides:
+This folder contains the FastAPI backend scaffold for GreenVista. It provides:
 
 - A FastAPI application factory.
 - Versioned routes under `/api/v1`.

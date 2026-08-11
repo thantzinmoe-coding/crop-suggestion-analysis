@@ -10,12 +10,12 @@ from app.core.config import get_settings
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    from app.db.session import ensure_indexes
-
-    await ensure_indexes()
-    if get_settings().initialize_database:
+    settings = get_settings()
+    if settings.initialize_database:
+        from app.db.session import ensure_indexes
         from app.seed import init_database
 
+        await ensure_indexes()
         await init_database()
     yield
 

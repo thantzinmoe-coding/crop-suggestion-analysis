@@ -88,7 +88,7 @@ const translations = {
     "crop.error": "Crop suggestions are not available in this frontend demo.",
 
     // Location & Weather
-    "loc.detect": "📍 Detect My Location",
+    "loc.detect": "Detect My Location",
     "loc.detecting": "Detecting location...",
     "loc.fetchWeather": "Fetching satellite data...",
     "loc.permDenied": "Location permission denied. Please enable GPS or enter values manually.",
@@ -116,10 +116,11 @@ const translations = {
     // Auth
     "auth.welcomeBack": "Welcome Back",
     "auth.createAccount": "Create Account",
-    "auth.loginSubtitle": "Sign in to access your AgroGuard dashboard",
-    "auth.registerSubtitle": "Join AgroGuard and start managing your farm",
+    "auth.loginSubtitle": "Sign in to access your GreenVista dashboard",
+    "auth.registerSubtitle": "Join GreenVista and start managing your farm",
     "auth.loginBtn": "Sign In",
     "auth.registerBtn": "Sign Up",
+    "auth.logout": "Sign out",
     "auth.fillFields": "Please fill in all fields",
     "auth.passwordMismatch": "Passwords do not match",
     "auth.email": "Email Address",
@@ -167,7 +168,7 @@ const translations = {
     "crop.error": "အကြံပြုချက် ရယူရန် မအောင်မြင်ပါ။ ML မော်ဒယ်နှင့် နောက်ကွယ်ပိုင်း အလုပ်လုပ်နေကြောင်း သေချာပါစေ။",
 
     // Location & Weather
-    "loc.detect": "📍 ကျွန်ုပ်၏ တည်နေရာ ရှာဖွေပါ",
+    "loc.detect": "ကျွန်ုပ်၏ တည်နေရာ ရှာဖွေပါ",
     "loc.detecting": "တည်နေရာ ရှာဖွေနေသည်...",
     "loc.fetchWeather": "ဂြိုလ်တုဒေတာ ရယူနေသည်...",
     "loc.permDenied": "တည်နေရာ ခွင့်ပြုချက် ပြန်လည်ငြင်းပယ်ထားသည်။ GPS ဖွင့်ပါ သို့မဟုတ် ကိုယ်တိုင် ထည့်သွင်းပါ။",
@@ -195,10 +196,11 @@ const translations = {
     // Auth
     "auth.welcomeBack": "ပြန်လည်ကြိုဆိုပါသည်",
     "auth.createAccount": "အကောင့်ဖန်တီးပါ",
-    "auth.loginSubtitle": "သင့် AgroGuard ဒက်ရှ်ဘုတ်သို့ ဝင်ရောက်ရန် အကောင့်ဝင်ပါ",
-    "auth.registerSubtitle": "AgroGuard တွင်ပါဝင်ပြီး သင့်လယ်ယာကို စီမံခန့်ခွဲပါ",
+    "auth.loginSubtitle": "သင့် GreenVista ဒက်ရှ်ဘုတ်သို့ ဝင်ရောက်ရန် အကောင့်ဝင်ပါ",
+    "auth.registerSubtitle": "GreenVista တွင်ပါဝင်ပြီး သင့်လယ်ယာကို စီမံခန့်ခွဲပါ",
     "auth.loginBtn": "အကောင့်ဝင်ရန်",
     "auth.registerBtn": "အကောင့်ဖွင့်ရန်",
+    "auth.logout": "ထွက်ရန်",
     "auth.fillFields": "ကျေးဇူးပြု၍ အချက်အလက်အားလုံးကို ဖြည့်စွက်ပါ",
     "auth.passwordMismatch": "စကားဝှက်များ မကိုက်ညီပါ",
     "auth.email": "အီးမေးလ် လိပ်စာ",

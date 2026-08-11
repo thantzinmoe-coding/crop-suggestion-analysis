@@ -23,7 +23,7 @@ async def test_versioned_health() -> None:
     assert response.status_code == 200
     assert response.json() == {
         "status": "ok",
-        "serviceName": "AgroGuard API",
+        "serviceName": "GreenVista API",
         "version": "0.1.0",
         "environment": "development",
     }

@@ -3,9 +3,9 @@ requires = ["setuptools>=75", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agroguard-api"
+name = "greenvista-api"
 version = "0.1.0"
-description = "FastAPI backend for the AgroGuard GIS, AI, and IoT hackathon project"
+description = "FastAPI backend for the GreenVista agricultural intelligence platform"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

@@ -2,6 +2,7 @@ import { Home, Radar, Sprout, Bot, Languages, LogOut } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import GreenVistaMark from './GreenVistaMark.jsx'
 
 const navItems = [
   { key: 'nav.landing', icon: Home, path: '/' },
@@ -28,12 +29,17 @@ function Sidebar({ mobileSidebarOpen, onClose }) {
     >
       <div className="flex items-start justify-between border-b border-myanglow-sage/70 px-6 py-6">
         <div>
-          <p
-            className="text-[1.25rem] font-semibold tracking-[0.14em] text-myanglow-medium"
-            style={{ fontFamily: 'Trebuchet MS, "Segoe UI", sans-serif' }}
-          >
-            AgroGuard
-          </p>
+          <div className="flex items-center gap-3 text-myanglow-medium">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-myanglow-forest text-white">
+              <GreenVistaMark className="h-7 w-7" />
+            </span>
+            <p
+              className="text-[1.05rem] font-semibold tracking-[0.12em]"
+              style={{ fontFamily: 'Trebuchet MS, "Segoe UI", sans-serif' }}
+            >
+              GREEN<span className="font-extrabold">VISTA</span>
+            </p>
+          </div>
           <h2 className="mt-2 text-[1.15rem] font-semibold text-myanglow-navy">{t('sidebar.title')}</h2>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             {t('sidebar.subtitle')}
