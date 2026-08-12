@@ -292,6 +292,49 @@ const myOverrides = {
   "crop.suitable": "သင့်တော်မှု",
 }
 
+Object.assign(myOverrides, {
+  "nav.home": "ပင်မစာမျက်နှာ",
+  "nav.fieldHealth": "စိုက်ခင်းကျန်းမာရေး",
+  "nav.cropPlanner": "သီးနှံစိုက်ပျိုးမှု စီမံကိန်း",
+  "nav.aiGuide": "AI လမ်းညွှန်",
+  "nav.workspace": "လုပ်ငန်းခွင်",
+  "nav.farmIntelligence": "စိုက်ပျိုးရေး အချက်အလက်စနစ်",
+  "nav.sidebarDescription": "ပိုမိုကောင်းမွန်သော သီးနှံနှင့် စိုက်ခင်းဆုံးဖြတ်ချက်များအတွက် တိကျသည့် ကိရိယာများ။",
+  "nav.navigate": "လမ်းညွှန် ပုံဖော်ရန်",
+  "nav.close": "လမ်းညွှန် ပိတ်ရန်",
+  "nav.open": "လမ်းညွှန် ဖွင့်ရန်",
+  "nav.mobileFooter": "ပိုမိုရှင်းလင်းသော စိုက်ပျိုးရေး ဆုံးဖြတ်ချက်များအတွက် စိုက်ခင်းအချက်အလက်။",
+  "crop.pageEyebrow": "စမတ် သီးနှံစိုက်ပျိုးမှု စီမံကိန်း",
+  "crop.benefitSatellite": "ဂြိုဟ်တု ရာသီဥတု အချက်အလက်",
+  "crop.benefitLocal": "ဒေသတွင်း အခြေအနေများ",
+  "crop.benefitGuidance": "လက်တွေ့ကျသော လမ်းညွှန်ချက်များ",
+  "crop.fieldData": "စိုက်ခင်း အချက်အလက်",
+  "crop.chooseSource": "အချက်အလက် ရယူမည့် နည်းလမ်းကို ရွေးချယ်ပါ",
+  "crop.currentLocation": "လက်ရှိ စိုက်ခင်းတည်နေရာကို အသုံးပြုရန်",
+  "crop.retrieveWeather": "သင်၏ တည်နေရာ အမှတ်စဉ်များမှ ဒေသတွင်း ရာသီဥတု အခြေအနေကို ရယူပါ။",
+  "crop.ownMeasurements": "မိမိကိုယ်တိုင် တိုင်းတာထားသော အချက်အလက်များကို အသုံးပြုရန်",
+  "crop.enterReadings": "နောက်တစ်ဆင့်တွင် လတ်တလော တိုင်းတာထားသော မြေဆီလွှာနှင့် ရာသီဥတု အချက်အလက်များကို ဖြည့်သွင်းပါ။",
+  "crop.growingConditions": "စိုက်ပျိုးရေး အခြေအနေများ",
+  "crop.reviewField": "စိုက်ခင်းကို ပြန်လည်စစ်ဆေးရန်",
+  "crop.currentConditions": "လက်ရှိ အခြေအနေများပေါ် မူတည်၍",
+  "crop.growingProfile": "စိုက်ပျိုးမှုဆိုင်ရာ အချက်အလက်",
+  "crop.yearGrowth": "နှစ်အလိုက် စိုက်ပျိုးကာလ",
+  "crop.waterNeed": "တစ်ရက်လျှင် လိုအပ်သော ရေပမာဏ (ယူနစ်)",
+  "crop.latestMarketPrice": "နောက်ဆုံး ပေါက်စျေး",
+  "crop.chooseCrop": "အကြံပြုထားသော သီးနှံကို ရွေးချယ်ပါ",
+  "crop.option": "ရွေးချယ်စရာ",
+  "crop.marketValue": "စျေးကွက်တန်ဖိုး",
+  "crop.productWeight": "ထွက်ရှိမည့် အလေးချိန် (ကီလိုဂရမ်)",
+  "crop.estimatedValue": "ခန့်မှန်းခြေ တန်ဖိုး",
+  "crop.suitable": "သင့်တော်သော",
+  "common.close": "ပိတ်ရန်",
+  "ndvi.location": "NDVI တည်နေရာ",
+  "ndvi.stateRegion": "ပြည်နယ် သို့မဟုတ် တိုင်းဒေသကြီး",
+  "ndvi.districtDetail": "ခရိုင် အသေးစိတ် (စိတ်ကြိုက်)",
+  "ndvi.allDistricts": "ခရိုင်အားလုံး (ပြည်နယ်/တိုင်း အကျဉ်းချုပ်)",
+  "ndvi.loadingData": "NDVI အချက်အလက်များ ရယူနေပါသည်..."
+});
+
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('en');
 
