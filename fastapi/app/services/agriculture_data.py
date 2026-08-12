@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+PROJECT_DATA_DIR = Path(__file__).resolve().parents[3] / "datasets"
 
 
 class AgricultureDatasetError(RuntimeError):
@@ -33,9 +34,73 @@ def load_ndvi_data() -> pd.DataFrame:
         raise AgricultureDatasetError(f"Unable to load NDVI dataset: {path}") from exc
 
 
+def _load_live_ndvi_data() -> pd.DataFrame | None:
+    """Read ingested observations from MongoDB when available.
+
+    The CSV remains a deliberate fallback for local development and for a first
+    deployment before Copernicus credentials and a MongoDB instance are set up.
+    """
+    try:
+        from pymongo import MongoClient
+
+        from app.core.config import get_settings
+
+        client = MongoClient(get_settings().mongodb_url, serverSelectionTimeoutMS=250)
+        collection = client[get_settings().database_name].ndvi_measurements
+        collection.find_one({}, {"_id": 1})
+        rows = list(collection.find({}, {"_id": 0}))
+        client.close()
+        if not rows:
+            return None
+        data = pd.DataFrame(rows).rename(
+            columns={"observation_date": "date", "mean_ndvi": "vim"}
+        )
+        data["date"] = pd.to_datetime(data["date"], errors="coerce", utc=True)
+        data["PCODE"] = data["region_pcode"]
+        data["viq"] = pd.to_numeric(data.get("viq", 0), errors="coerce").fillna(0)
+        return data.dropna(subset=["date", "PCODE"])
+    except Exception:
+        return None
+
+
+def get_ndvi_data() -> pd.DataFrame:
+    live = _load_live_ndvi_data()
+    return live if live is not None and not live.empty else load_ndvi_data()
+
+
+@lru_cache(maxsize=1)
+def load_region_names() -> dict[str, dict[str, str]]:
+    """Load authoritative Myanmar PCODE names from the added boundary workbook."""
+    path = PROJECT_DATA_DIR / "mmr_admin_boundaries.xlsx"
+    try:
+        states = pd.read_excel(path, sheet_name="mmr_admin1", usecols="A:E")
+        districts = pd.read_excel(path, sheet_name="mmr_admin2", usecols="A:B,E:J")
+        names: dict[str, dict[str, str]] = {}
+        for _, row in states.iterrows():
+            pcode = str(row["adm1_pcode"]).strip()
+            if pcode and pcode != "nan":
+                names[pcode] = {
+                    "name_en": str(row["adm1_name"]).strip(),
+                    "name_my": str(row["adm1_name1"]).strip(),
+                    "level": "state",
+                }
+        for _, row in districts.iterrows():
+            pcode = str(row["adm2_pcode"]).strip()
+            if pcode and pcode != "nan":
+                names[pcode] = {
+                    "name_en": str(row["adm2_name"]).strip(),
+                    "name_my": str(row["adm2_name1"]).strip(),
+                    "state_pcode": str(row["adm1_pcode"]).strip(),
+                    "level": "district",
+                }
+        return names
+    except (OSError, ImportError, KeyError, ValueError):
+        return {}
+
+
 def dataset_summary() -> dict:
     township = load_township_data()
-    ndvi = load_ndvi_data()
+    ndvi = get_ndvi_data()
     return {
         "total_records": int(len(township)),
         "avg_yield": round(float(township["historic_yield_tons_per_ha"].mean()), 2),
@@ -77,17 +142,21 @@ def crop_analysis() -> dict:
 
 
 def ndvi_regions() -> list[dict]:
-    data = load_ndvi_data()
-    return (
+    data = get_ndvi_data()
+    regions = (
         data[["PCODE", "adm_id"]]
         .drop_duplicates()
         .sort_values(["PCODE", "adm_id"])
         .to_dict(orient="records")
     )
+    names = load_region_names()
+    for region in regions:
+        region.update(names.get(region["PCODE"], {}))
+    return regions
 
 
 def ndvi_series(pcode: str | None = None) -> dict:
-    data = load_ndvi_data()
+    data = get_ndvi_data()
     cutoff = data["date"].max() - pd.DateOffset(years=5)
     filtered = data[data["date"] >= cutoff].copy()
     if pcode:
@@ -107,7 +176,7 @@ def ndvi_series(pcode: str | None = None) -> dict:
 
 def ndvi_rainfall_correlation() -> dict:
     township = load_township_data().copy()
-    ndvi = load_ndvi_data().copy()
+    ndvi = get_ndvi_data().copy()
     township["month"] = township["date"].dt.month
     ndvi["month"] = ndvi["date"].dt.month
     rainfall = township.groupby("month")["rainfall_mm"].mean()

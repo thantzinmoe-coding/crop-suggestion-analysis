@@ -55,6 +55,35 @@ used by the application.
 
 The health endpoints do not require a running database, so the FastAPI setup can be verified before PostgreSQL/PostGIS is installed.
 
+## Near-real-time Sentinel-2 NDVI
+
+The NDVI dashboard uses the historical CSV when no live observations have been
+ingested. To enable Copernicus Data Space, set these private values in `.env`:
+
+```env
+AGROGUARD_CDSE_ENABLED=true
+AGROGUARD_CDSE_CLIENT_ID=your-client-id
+AGROGUARD_CDSE_CLIENT_SECRET=your-client-secret
+AGROGUARD_CDSE_CLOUD_COVER_MAX=40
+```
+
+After MongoDB is running and initialized, run the ingestion job:
+
+```powershell
+python -m app.jobs.ingest_ndvi
+```
+
+Run it daily with Windows Task Scheduler or a deployment worker. The job
+queries recent Sentinel-2 L2A observations, masks cloud and snow classes,
+calculates NDVI from B08 and B04, and stores the regional mean in MongoDB.
+The current regional boxes are approximate 10 km boxes around configured
+region coordinates; replace them with official administrative GeoJSON before
+using the values for field-level decisions.
+
+The API reads MongoDB observations first and falls back to the existing CSV if
+MongoDB is unavailable or empty. Satellite refresh is near-real-time, not
+instantaneous: usable observations depend on satellite revisit and cloud cover.
+
 ## Recommended next modules
 
 Add one vertical slice at a time in this order:

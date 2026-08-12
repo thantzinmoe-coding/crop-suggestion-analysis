@@ -30,6 +30,8 @@ ChartJS.register(
 export default function NDVIAnalysis() {
   const { t, language } = useLanguage();
   const [regions, setRegions] = useState([]);
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedPcode, setSelectedPcode] = useState('');
   const [ndviData, setNdviData] = useState({ labels: [], vim: [], viq: [] });
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,9 @@ export default function NDVIAnalysis() {
         );
         const availableRegions = response.data || [];
         setRegions(availableRegions);
-        setSelectedPcode((current) => current || availableRegions[0]?.PCODE || '');
+        const firstState = availableRegions.find((region) => !region.PCODE.includes('D'))?.PCODE || availableRegions[0]?.PCODE || '';
+        setSelectedState((current) => current || firstState);
+        setSelectedPcode((current) => current || firstState);
       } catch (err) {
         if (err.code !== 'ERR_CANCELED') {
           console.error('NDVI regions error:', err);
@@ -60,6 +64,30 @@ export default function NDVIAnalysis() {
     loadRegions();
     return () => controller.abort();
   }, []);
+
+  const states = regions.filter((region) => region.level === 'state' || !region.PCODE.includes('D'));
+  const districts = regions
+    .filter((region) => region.level === 'district' && region.state_pcode === selectedState)
+    .sort((a, b) => a.PCODE.localeCompare(b.PCODE));
+
+  const getRegionName = (region) => {
+    const name = language === 'my' ? region.name_my : region.name_en;
+    if (name) return name;
+    return region.PCODE;
+  };
+
+  const handleStateChange = (event) => {
+    const nextState = event.target.value;
+    setSelectedState(nextState);
+    setSelectedDistrict('');
+    setSelectedPcode(nextState);
+  };
+
+  const handleDistrictChange = (event) => {
+    const nextDistrict = event.target.value;
+    setSelectedDistrict(nextDistrict);
+    setSelectedPcode(nextDistrict || selectedState);
+  };
 
   useEffect(() => {
     if (!selectedPcode) return undefined;
@@ -151,22 +179,6 @@ export default function NDVIAnalysis() {
     },
   };
 
-  const getRegionName = (pcode, adm_id) => {
-    // If it's in our mapping (e.g. MMR001), use the mapped name.
-    // If it's a district (like MMR001D001), fallback to the original PCODE or adm_id
-    if (pcodeMap[language] && pcodeMap[language][pcode]) {
-      return pcodeMap[language][pcode];
-    }
-    // Attempt to extract the state part for districts (e.g. MMR001 from MMR001D001)
-    if (pcode && pcode.length > 6) {
-      const statePcode = pcode.substring(0, 6);
-      if (pcodeMap[language] && pcodeMap[language][statePcode]) {
-        return `${pcodeMap[language][statePcode]} (${pcode})`;
-      }
-    }
-    return `${adm_id} (${pcode})`;
-  };
-
   return (
     <div className="ndvi-analysis">
       <h2 className="m-0 text-xl font-semibold"><Satellite size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '10px' }}/> {t('ndvi.title')}</h2>
@@ -186,16 +198,36 @@ export default function NDVIAnalysis() {
       </div>
 
       <div className="ndvi-controls glass-panel">
-        <label style={{ margin: 0 }}>{t('ndvi.selectRegion')}</label>
-        <select 
-          value={selectedPcode} 
-          onChange={(e) => setSelectedPcode(e.target.value)}
-          disabled={loading && regions.length === 0}
-        >
-          {regions.map((r) => (
-            <option key={`${r.PCODE}-${r.adm_id}`} value={r.PCODE}>{getRegionName(r.PCODE, r.adm_id)}</option>
-          ))}
-        </select>
+        <div className="ndvi-controls-heading">
+          <div className="ndvi-controls-kicker">NDVI LOCATION</div>
+          <h3>{t('ndvi.selectRegion')}</h3>
+        </div>
+        <div className="ndvi-control-field">
+          <label htmlFor="ndvi-state">State or Region</label>
+          <select
+            id="ndvi-state"
+            value={selectedState}
+            onChange={handleStateChange}
+            disabled={loading && regions.length === 0}
+          >
+            {states.map((state) => (
+              <option key={state.PCODE} value={state.PCODE}>
+                {getRegionName(state)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="ndvi-control-field">
+          <label htmlFor="ndvi-district">Optional district detail</label>
+          <select id="ndvi-district" value={selectedDistrict} onChange={handleDistrictChange}>
+            <option value="">All districts (state overview)</option>
+            {districts.map((district) => (
+              <option key={district.PCODE} value={district.PCODE}>
+                {getRegionName(district)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error && <p className="crop-suggestion-error" role="alert">{error}</p>}

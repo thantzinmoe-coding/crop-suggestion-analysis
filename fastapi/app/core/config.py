@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     openweather_api_key: SecretStr | None = None
     openweather_base_url: str = "https://api.openweathermap.org"
 
+    # Copernicus Data Space (Sentinel Hub-compatible) integration.
+    cdse_client_id: str | None = None
+    cdse_client_secret: SecretStr | None = None
+    cdse_token_url: str = (
+        "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
+    )
+    cdse_process_url: str = "https://sh.dataspace.copernicus.eu/api/v1/statistics"
+    cdse_enabled: bool = False
+    cdse_cloud_cover_max: float = 40.0
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
