@@ -84,6 +84,26 @@ The API reads MongoDB observations first and falls back to the existing CSV if
 MongoDB is unavailable or empty. Satellite refresh is near-real-time, not
 instantaneous: usable observations depend on satellite revisit and cloud cover.
 
+## Crop suggestion
+
+`POST /api/v1/crop-suggestion` uses the original `app/data/plants.csv` dataset
+for climate-based plant matching. It accepts soil pH, rainfall, temperature,
+and farm area; N/P/K soil-test values are not required.
+
+The response includes up to three alternatives and market metadata. Matching prices come from
+`datasets/wfp_food_prices_mmr.csv`, filtered by the detected state where
+possible, with the project township price history as a fallback. Crops without
+an available price are excluded from the suggestions. WFP data is historical
+and reaches 2026-06-15 in this export, so the API returns the observation date
+rather than calling it live.
+
+Use `GET /api/v1/crop-market-prices?admin1=Shan%20(South)` to inspect the newest
+available crop prices for a region.
+
+`datasets/Crop_recommendation.csv` and `datasets/Crop and fertilizer dataset.csv`
+are not used by the crop suggestion flow. The latter contains Kolhapur, India
+records and should not be used for Myanmar fertilizer advice.
+
 ## Recommended next modules
 
 Add one vertical slice at a time in this order:

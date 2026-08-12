@@ -29,9 +29,9 @@ function DesktopSidebar() {
       </Link>
 
       <div className="gv-sidebar-intro">
-        <p>Workspace</p>
-        <h2>Farm intelligence</h2>
-        <span>Clear tools for healthier fields and better crop decisions.</span>
+        <p>{t('nav.workspace')}</p>
+        <h2>{t('nav.farmIntelligence')}</h2>
+        <span>{t('nav.sidebarDescription')}</span>
       </div>
 
       <nav className="gv-sidebar-nav" aria-label="Workspace navigation">

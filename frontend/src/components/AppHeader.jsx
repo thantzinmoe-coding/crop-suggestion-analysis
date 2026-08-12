@@ -6,10 +6,10 @@ import { useLanguage } from '../contexts/LanguageContext.jsx'
 import GreenVistaMark from './GreenVistaMark.jsx'
 
 const navItems = [
-  { key: 'nav.landing', label: 'Home', icon: Home, path: '/' },
-  { key: 'nav.ndvi', label: 'Field health', icon: Radar, path: '/ndvi-analysis' },
-  { key: 'nav.suggestion', label: 'Crop planner', icon: Sprout, path: '/crop-suggestion' },
-  { key: 'nav.chat', label: 'AI guide', icon: Bot, path: '/ai-chat' },
+  { key: 'nav.home', icon: Home, path: '/' },
+  { key: 'nav.fieldHealth', icon: Radar, path: '/ndvi-analysis' },
+  { key: 'nav.cropPlanner', icon: Sprout, path: '/crop-suggestion' },
+  { key: 'nav.aiGuide', icon: Bot, path: '/ai-chat' },
 ]
 
 function AppHeader() {
@@ -52,9 +52,9 @@ function AppHeader() {
         </Link>
 
         <nav className="gv-app-links" aria-label="Workspace navigation">
-          {navItems.map(({ label, path }) => (
+          {navItems.map(({ key, path }) => (
             <NavLink key={path} to={path} end={path === '/'}>
-              {label}
+              {t(key)}
             </NavLink>
           ))}
         </nav>
@@ -72,7 +72,7 @@ function AppHeader() {
           <button
             className="gv-menu-button"
             type="button"
-            aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+            aria-label={menuOpen ? t('nav.close') : t('nav.open')}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
           >
@@ -83,11 +83,11 @@ function AppHeader() {
 
       {menuOpen && (
         <>
-          <button className="gv-mobile-menu-backdrop" type="button" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />
-          <aside className="gv-mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+          <button className="gv-mobile-menu-backdrop" type="button" aria-label={t('nav.close')} onClick={() => setMenuOpen(false)} />
+          <aside className="gv-mobile-menu" role="dialog" aria-modal="true" aria-label={t('nav.navigate')}>
             <div className="gv-mobile-menu-head">
-              <div><span>Navigate</span><strong>GreenVista</strong></div>
-              <button type="button" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X size={20} /></button>
+              <div><span>{t('nav.navigate')}</span><strong>GreenVista</strong></div>
+              <button type="button" aria-label={t('nav.close')} onClick={() => setMenuOpen(false)}><X size={20} /></button>
             </div>
             <nav aria-label="Mobile workspace navigation">
               {navItems.map(({ key, icon: Icon, path }) => (
@@ -98,7 +98,7 @@ function AppHeader() {
               ))}
             </nav>
             <div className="gv-mobile-menu-footer">
-              <p>Field intelligence for clearer farming decisions.</p>
+              <p>{t('nav.mobileFooter')}</p>
               <button type="button" onClick={handleLogout}>
                 <LogOut size={18} aria-hidden="true" />
                 {t('auth.logout') || 'Sign out'}

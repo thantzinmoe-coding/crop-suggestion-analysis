@@ -65,7 +65,7 @@ export default function CropSuggestion() {
   const [formData, setFormData] = useState({
     soil_pH: 6.5,
     rainfall_mm: 0,
-    temperature_c: 28.0
+    temperature_c: 28.0,
   });
   
   // Location & weather state
@@ -84,7 +84,6 @@ export default function CropSuggestion() {
   const [explaining, setExplaining] = useState(false);
   const [error, setError] = useState(null);
   const [marketWeight, setMarketWeight] = useState(100);
-  const [farmAcreage, setFarmAcreage] = useState(1);
   
   const streamedTextRef = useRef('');
 
@@ -127,7 +126,7 @@ export default function CropSuggestion() {
           setFormData({
             soil_pH: data.current.soil_pH_estimate,
             rainfall_mm: data.current.rainfall_7d_mm,
-            temperature_c: data.current.temperature_c
+            temperature_c: data.current.temperature_c,
           });
 
           setLocStatus('done');
@@ -212,9 +211,12 @@ export default function CropSuggestion() {
     
     try {
       const payload = Object.fromEntries(
-        Object.entries(formData).map(([key, value]) => [key, Number(value)])
+        Object.entries(formData)
+          .filter(([, value]) => value !== '' && value !== null && value !== undefined)
+          .map(([key, value]) => [key, Number(value)])
       );
-      if (Object.values(payload).some((value) => !Number.isFinite(value))) {
+      if (weatherData?.region?.name_en) payload.admin1 = weatherData.region.name_en;
+      if (Object.values(payload).some((value) => typeof value === 'number' && !Number.isFinite(value))) {
         setError('Please enter valid numbers for all crop conditions.');
         setLoading(false);
         return;
@@ -243,6 +245,8 @@ export default function CropSuggestion() {
   const selectedRecommendation =
     predictionRecommendations[selectedRecommendationIndex] || null;
 
+  const selectedPrice = Number(selectedRecommendation?.marketPriceMmkPerKg) || 0;
+
   const selectRecommendation = (recommendation, index) => {
     setSelectedRecommendationIndex(index);
     setSuggestion(recommendation.crop);
@@ -251,18 +255,18 @@ export default function CropSuggestion() {
   };
 
   return (
-    <div className="crop-suggestion">
+    <div className={`crop-suggestion ${language === 'my' ? 'language-my' : ''}`}>
       <section className="crop-page-hero" aria-labelledby="crop-page-title">
         <div className="crop-page-hero-copy">
-          <p className="crop-page-eyebrow"><Sparkles size={15} /> Smart crop planning</p>
+          <p className="crop-page-eyebrow"><Sparkles size={15} /> {t('crop.pageEyebrow')}</p>
           <h1 id="crop-page-title">
             {language === 'my' ? 'သင့်လယ်ကွင်းအတွက် သင့်တော်သော သီးနှံကို ရွေးချယ်ပါ။' : 'Choose what grows best here.'}
           </h1>
           <p>{t('crop.subtitle')}</p>
           <div className="crop-page-benefits" aria-label="Planner benefits">
-            <span><Satellite size={16} /> Satellite weather</span>
-            <span><LandPlot size={16} /> Local conditions</span>
-            <span><Sprout size={16} /> Practical guidance</span>
+            <span><Satellite size={16} /> {t('crop.benefitSatellite')}</span>
+            <span><LandPlot size={16} /> {t('crop.benefitLocal')}</span>
+            <span><Sprout size={16} /> {t('crop.benefitGuidance')}</span>
           </div>
         </div>
         <Sprout className="crop-page-hero-art" size={250} strokeWidth={0.7} aria-hidden="true" />
@@ -272,7 +276,7 @@ export default function CropSuggestion() {
         <section className="crop-planner-card crop-source-card" aria-labelledby="crop-source-title">
           <header className="crop-card-heading">
             <span>01</span>
-            <div><p>Field data</p><h2 id="crop-source-title">Choose your data source</h2></div>
+            <div><p>{t('crop.fieldData')}</p><h2 id="crop-source-title">{t('crop.chooseSource')}</h2></div>
           </header>
 
           <div className="mode-toggle crop-mode-toggle">
@@ -284,7 +288,7 @@ export default function CropSuggestion() {
             <div className="crop-source-action">
               <div className="crop-source-intro">
                 <MapPin size={22} aria-hidden="true" />
-                <div><strong>Use current field location</strong><p>Retrieve regional weather conditions from your coordinates.</p></div>
+                <div><strong>{t('crop.currentLocation')}</strong><p>{t('crop.retrieveWeather')}</p></div>
               </div>
               <button className="detect-btn" type="button" onClick={detectLocation} disabled={locStatus === 'detecting' || locStatus === 'fetching'}>
                 {locStatus === 'detecting' && <><span className="spinner" /> {t('loc.detecting')}</>}
@@ -308,14 +312,14 @@ export default function CropSuggestion() {
               )}
             </div>
           ) : (
-            <div className="crop-manual-note"><FlaskConical size={22} aria-hidden="true" /><div><strong>Use your own measurements</strong><p>Enter recent soil and weather readings in the next step.</p></div></div>
+            <div className="crop-manual-note"><FlaskConical size={22} aria-hidden="true" /><div><strong>{t('crop.ownMeasurements')}</strong><p>{t('crop.enterReadings')}</p></div></div>
           )}
         </section>
 
         <form onSubmit={handleSubmit} className="crop-planner-card crop-web-form" aria-labelledby="crop-conditions-title">
           <header className="crop-card-heading">
             <span>02</span>
-            <div><p>Growing conditions</p><h2 id="crop-conditions-title">Review your field</h2></div>
+            <div><p>{t('crop.growingConditions')}</p><h2 id="crop-conditions-title">{t('crop.reviewField')}</h2></div>
           </header>
           {mode === 'auto' && weatherData && <p className="crop-form-note">{t('loc.override')}</p>}
           <div className="form-group"><label htmlFor="soil-pH"><FlaskConical size={17} /> {t('crop.soilPh')}</label><input id="soil-pH" type="number" name="soil_pH" step="0.1" value={formData.soil_pH} onChange={handleChange} required /></div>
@@ -328,7 +332,7 @@ export default function CropSuggestion() {
 
       {weatherData && weatherData.advisories?.length > 0 && mode === 'auto' && (
         <section className="crop-advisories-section">
-          <header><Lightbulb size={21} /><div><p>Based on current conditions</p><h2>{t('loc.advisories')}</h2></div></header>
+          <header><Lightbulb size={21} /><div><p>{t('crop.currentConditions')}</p><h2>{t('loc.advisories')}</h2></div></header>
           <div className="advisories-container">
             {weatherData.advisories.map((adv, idx) => (
               <div key={idx} className={`advisory-card ${adv.severity}`}>
@@ -566,11 +570,26 @@ export default function CropSuggestion() {
             </div>
             <p className="suggestion-eyebrow">{t('crop.recommended')}</p>
             <h2>{selectedRecommendation.crop}</h2>
-            <span className="match-badge">{selectedRecommendation.suitabilityPercent}% suitable</span>
+            <span className="match-badge">{selectedRecommendation.suitabilityPercent}% {t('crop.suitable')}</span>
             <p className="suggestion-pop-reason">{selectedRecommendation.description}</p>
 
+            {(selectedRecommendation.sunlight || selectedRecommendation.growthPeriodYears) && (
+              <div className="crop-profile-note">
+                <span>{t('crop.growingProfile')}</span>
+                {selectedRecommendation.sunlight && <strong>{selectedRecommendation.sunlight}</strong>}
+                {selectedRecommendation.growthPeriodYears && <strong>{selectedRecommendation.growthPeriodYears} {t('crop.yearGrowth')}</strong>}
+                {selectedRecommendation.waterNeedLitersPerDay > 0 && <strong>{selectedRecommendation.waterNeedLitersPerDay} {t('crop.waterNeed')}</strong>}
+              </div>
+            )}
+
+            <div className="crop-market-price-summary">
+              <span>{t('crop.latestMarketPrice')}</span>
+              <strong>{selectedPrice.toLocaleString()} MMK/kg</strong>
+              <small>{selectedRecommendation.marketPriceSource || 'Project history'}{selectedRecommendation.marketPriceObservedDate ? ` · ${selectedRecommendation.marketPriceObservedDate}` : ''}</small>
+            </div>
+
             {predictionRecommendations.length > 1 && (
-              <div className="recommendation-options" aria-label="Choose a crop recommendation">
+              <div className="recommendation-options" aria-label={t('crop.chooseCrop')}>
                 {predictionRecommendations.map((recommendation, index) => (
                   <button
                     type="button"
@@ -584,7 +603,7 @@ export default function CropSuggestion() {
                         <CropIcon cropKey={recommendation.cropKey} size={22} />
                       </span>
                       <span>
-                        <small>Option {index + 1}</small>
+                        <small>{t('crop.option')} {index + 1}</small>
                         <strong>{recommendation.crop}</strong>
                       </span>
                     </span>
@@ -594,13 +613,13 @@ export default function CropSuggestion() {
               </div>
             )}
 
-            <div className="crop-calculators">
+            <div className="crop-calculators crop-market-calculator">
               <div className="crop-calculator-card">
                 <div className="calculator-heading">
-                  <span><CircleDollarSign size={18} /> Market Value</span>
-                  <small>{selectedRecommendation.marketPriceMmkPerKg.toLocaleString()} MMK/kg</small>
+                  <span><CircleDollarSign size={18} /> {t('crop.marketValue')}</span>
+                  <small>{selectedPrice.toLocaleString()} MMK/kg</small>
                 </div>
-                <label htmlFor="market-weight"><Scale size={14} /> Product weight (kg)</label>
+                <label htmlFor="market-weight"><Scale size={14} /> {t('crop.productWeight')}</label>
                 <input
                   id="market-weight"
                   type="number"
@@ -610,32 +629,13 @@ export default function CropSuggestion() {
                   onChange={(event) => setMarketWeight(Math.max(0, Number(event.target.value)))}
                 />
                 <p className="calculator-result">
-                  <span>Estimated value</span>
-                  <strong>{(marketWeight * selectedRecommendation.marketPriceMmkPerKg).toLocaleString()} MMK</strong>
+                  <span>{t('crop.estimatedValue')}</span>
+                  <strong>{(marketWeight * selectedPrice).toLocaleString()} MMK</strong>
                 </p>
               </div>
 
-              <div className="crop-calculator-card">
-                <div className="calculator-heading">
-                  <span><LandPlot size={18} /> Crop Yield</span>
-                  <small>{selectedRecommendation.yieldPerAcreKg.toLocaleString()} kg/acre</small>
-                </div>
-                <label htmlFor="farm-acreage"><LandPlot size={14} /> Farm acreage</label>
-                <input
-                  id="farm-acreage"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={farmAcreage}
-                  onChange={(event) => setFarmAcreage(Math.max(0, Number(event.target.value)))}
-                />
-                <p className="calculator-result">
-                  <span>Expected production</span>
-                  <strong>{(farmAcreage * selectedRecommendation.yieldPerAcreKg).toLocaleString()} kg</strong>
-                </p>
-              </div>
             </div>
-            <button type="button" className="btn btn-primary" onClick={() => setSuggestion(null)}>Close</button>
+            <button type="button" className="btn btn-primary" onClick={() => setSuggestion(null)}>{t('common.close')}</button>
           </section>
         </div>
       )}

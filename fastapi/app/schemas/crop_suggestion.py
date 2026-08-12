@@ -9,6 +9,8 @@ class CropSuggestionRequest(BaseModel):
     soil_ph: float = Field(alias="soil_pH", ge=0, le=14)
     rainfall_mm: float = Field(ge=0)
     temperature_c: float = Field(ge=-50, le=70)
+    admin1: str | None = None
+    admin2: str | None = None
     language: Literal["en", "my"] = "en"
 
 
@@ -23,8 +25,14 @@ class CropRecommendation(APIModel):
     crop_key: str
     suitability_percent: float = Field(ge=0, le=100)
     market_price_mmk_per_kg: float = Field(ge=0)
-    yield_per_acre_kg: float = Field(ge=0)
     description: str
+    market_price_source: str | None = None
+    market_price_observed_date: str | None = None
+    market_name: str | None = None
+    market_price_is_dynamic: bool = False
+    water_need_liters_per_day: float | None = None
+    sunlight: str | None = None
+    growth_period_years: str | None = None
 
 
 class PlantSuggestionRequest(CropSuggestionRequest):

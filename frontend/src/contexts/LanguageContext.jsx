@@ -48,6 +48,17 @@ export const pcodeMap = {
 const translations = {
   en: {
     "nav.landing": "Landing Page",
+    "nav.home": "Home",
+    "nav.fieldHealth": "Field health",
+    "nav.cropPlanner": "Crop planner",
+    "nav.aiGuide": "AI guide",
+    "nav.workspace": "Workspace",
+    "nav.farmIntelligence": "Farm intelligence",
+    "nav.sidebarDescription": "Clear tools for healthier fields and better crop decisions.",
+    "nav.navigate": "Navigate",
+    "nav.close": "Close navigation",
+    "nav.open": "Open navigation",
+    "nav.mobileFooter": "Field intelligence for clearer farming decisions.",
     "sidebar.title": "Farm Intelligence",
     "sidebar.subtitle": "Clean monitoring and diagnosis for healthy crops.",
     "language.english": "English",
@@ -68,6 +79,11 @@ const translations = {
     "ndvi.avgVim": "Historical Greenness (5yr)",
     "ndvi.latestViq": "Quality vs Average (VIQ)",
     "ndvi.loading": "Loading satellite data...",
+    "ndvi.location": "NDVI LOCATION",
+    "ndvi.stateRegion": "State or Region",
+    "ndvi.districtDetail": "Optional district detail",
+    "ndvi.allDistricts": "All districts (state overview)",
+    "ndvi.loadingData": "Loading NDVI data...",
     
     // NDVI Explanations
     "ndvi.whatIsNdvi": "What do these numbers mean?",
@@ -75,6 +91,30 @@ const translations = {
     "ndvi.viqDesc": "VIQ (Quality Percentile): Compares current health to historical averages. Above 50 means better than normal, below 50 means worse than normal.",
 
     // Crop Suggestion
+    "crop.pageEyebrow": "Smart crop planning",
+    "crop.benefitSatellite": "Satellite weather",
+    "crop.benefitLocal": "Local conditions",
+    "crop.benefitGuidance": "Practical guidance",
+    "crop.fieldData": "Field data",
+    "crop.chooseSource": "Choose your data source",
+    "crop.currentLocation": "Use current field location",
+    "crop.retrieveWeather": "Retrieve regional weather conditions from your coordinates.",
+    "crop.ownMeasurements": "Use your own measurements",
+    "crop.enterReadings": "Enter recent soil and weather readings in the next step.",
+    "crop.growingConditions": "Growing conditions",
+    "crop.reviewField": "Review your field",
+    "crop.currentConditions": "Based on current conditions",
+    "crop.growingProfile": "Growing profile",
+    "crop.yearGrowth": "year growth period",
+    "crop.waterNeed": "water-need units/day",
+    "crop.latestMarketPrice": "Latest market price",
+    "crop.suitable": "suitable",
+    "crop.chooseCrop": "Choose a crop recommendation",
+    "crop.option": "Option",
+    "crop.marketValue": "Market value",
+    "crop.productWeight": "Product weight (kg)",
+    "crop.estimatedValue": "Estimated value",
+    "common.close": "Close",
     "crop.title": "AI Crop Suggestion",
     "crop.subtitle": "Auto-detect your location to get real satellite weather data and smart crop recommendations.",
     "crop.soilPh": "Soil pH Level",
@@ -129,6 +169,17 @@ const translations = {
   },
   my: {
     "nav.landing": "ပင်မစာမျက်နှာ",
+    "nav.home": "ပင်မစာမျက်နှာ",
+    "nav.fieldHealth": "လယ်ကွင်းကျန်းမာရေး",
+    "nav.cropPlanner": "သီးနှံစီမံကိန်း",
+    "nav.aiGuide": "AI လမ်းညွှန်",
+    "nav.workspace": "လုပ်ငန်းခွင်",
+    "nav.farmIntelligence": "လယ်ယာအချက်အလက်",
+    "nav.sidebarDescription": "ကျန်းမာသောလယ်ကွင်းများနှင့် ပိုမိုကောင်းမွန်သော သီးနှံဆုံးဖြတ်ချက်များအတွက် ရှင်းလင်းသောကိရိယာများ။",
+    "nav.navigate": "သွားရန်",
+    "nav.close": "လမ်းညွှန်မှု ပိတ်ရန်",
+    "nav.open": "လမ်းညွှန်မှု ဖွင့်ရန်",
+    "nav.mobileFooter": "ပိုမိုရှင်းလင်းသော စိုက်ပျိုးရေးဆုံးဖြတ်ချက်များအတွက် လယ်ယာအချက်အလက်။",
     "sidebar.title": "လယ်ယာ အသိဉာဏ်စနစ်",
     "sidebar.subtitle": "ကျန်းမာသောသီးနှံများအတွက် စောင့်ကြည့်ခြင်းနှင့် ရောဂါရှာဖွေခြင်း။",
     "language.english": "English", "language.burmese": "မြန်မာ",
@@ -155,6 +206,29 @@ const translations = {
     "ndvi.viqDesc": "VIQ (အရည်အသွေး ရာခိုင်နှုန်း): လက်ရှိကျန်းမာရေးကို ယခင်နှစ်များ၏ ပျမ်းမျှအခြေအနေနှင့် နှိုင်းယှဉ်ပြသည်။ ၅၀ အထက်ဆိုလျှင် ပုံမှန်ထက် ပိုကောင်းပြီး၊ ၅၀ အောက်ဆိုလျှင် ပုံမှန်ထက် ဆိုးရွားသည်ဟု ဆိုလိုသည်။",
 
     // Crop Suggestion
+    "crop.pageEyebrow": "သီးနှံစီမံကိန်း",
+    "crop.benefitSatellite": "ဂြိုဟ်တုရာသီဥတု",
+    "crop.benefitLocal": "ဒေသအခြေအနေ",
+    "crop.benefitGuidance": "လက်တွေ့လမ်းညွှန်ချက်",
+    "crop.fieldData": "လယ်ကွင်းအချက်အလက်",
+    "crop.chooseSource": "အချက်အလက်ရင်းမြစ် ရွေးချယ်ပါ",
+    "crop.currentLocation": "လက်ရှိလယ်ကွင်းတည်နေရာကို အသုံးပြုရန်",
+    "crop.retrieveWeather": "သင့်တည်နေရာမှ ဒေသဆိုင်ရာရာသီဥတုအခြေအနေကို ရယူပါ။",
+    "crop.ownMeasurements": "သင့်ကိုယ်ပိုင်တိုင်းတာချက်များကို အသုံးပြုရန်",
+    "crop.enterReadings": "နောက်တစ်ဆင့်တွင် မြေနှင့်ရာသီဥတု တိုင်းတာချက်များကို ထည့်ပါ။",
+    "crop.growingConditions": "စိုက်ပျိုးမှုအခြေအနေများ",
+    "crop.reviewField": "သင့်လယ်ကွင်းကို စစ်ဆေးပါ",
+    "crop.currentConditions": "လက်ရှိအခြေအနေအပေါ် အခြေခံ၍",
+    "crop.growingProfile": "စိုက်ပျိုးမှုအချက်အလက်",
+    "crop.yearGrowth": "နှစ် ကြီးထွားကာလ",
+    "crop.waterNeed": "တစ်နေ့ ရေလိုအပ်ချက်ယူနစ်",
+    "crop.latestMarketPrice": "နောက်ဆုံးစျေးကွက်စျေးနှုန်း",
+    "crop.chooseCrop": "သီးနှံရွေးချယ်ပါ",
+    "crop.option": "ရွေးချယ်မှု",
+    "crop.marketValue": "စျေးကွက်တန်ဖိုး",
+    "crop.productWeight": "ထွက်ကုန်အလေးချိန် (ကီလိုဂရမ်)",
+    "crop.estimatedValue": "ခန့်မှန်းတန်ဖိုး",
+    "common.close": "ပိတ်ရန်",
     "crop.title": "AI သီးနှံအကြံပြုချက်",
     "crop.subtitle": "သင့်တည်နေရာကို ရှာဖွေပြီး ဂြိုလ်တု ရာသီဥတုဒေတာနှင့် စမတ် သီးနှံ အကြံပြုချက်ကို ရယူပါ။",
     "crop.soilPh": "မြေဆီလွှာ pH အဆင့်",
@@ -209,11 +283,20 @@ const translations = {
   }
 };
 
+const myOverrides = {
+  "ndvi.location": "NDVI တည်နေရာ",
+  "ndvi.stateRegion": "ပြည်နယ် သို့မဟုတ် တိုင်းဒေသကြီး",
+  "ndvi.districtDetail": "ခရိုင်အသေးစိတ် (ရွေးချယ်နိုင်သည်)",
+  "ndvi.allDistricts": "ခရိုင်အားလုံး (ပြည်နယ်အနှစ်ချုပ်)",
+  "ndvi.loadingData": "NDVI အချက်အလက်များကို ရယူနေသည်...",
+  "crop.suitable": "သင့်တော်မှု",
+}
+
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('en');
 
   const t = (key) => {
-    return translations[language][key] || translations['en'][key] || key;
+    return (language === 'my' ? myOverrides[key] : null) || translations[language][key] || translations['en'][key] || key;
   };
 
   const toggleLanguage = () => {

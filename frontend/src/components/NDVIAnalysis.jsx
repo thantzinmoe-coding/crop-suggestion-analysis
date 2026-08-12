@@ -199,11 +199,11 @@ export default function NDVIAnalysis() {
 
       <div className="ndvi-controls glass-panel">
         <div className="ndvi-controls-heading">
-          <div className="ndvi-controls-kicker">NDVI LOCATION</div>
+          <div className="ndvi-controls-kicker">{t('ndvi.location')}</div>
           <h3>{t('ndvi.selectRegion')}</h3>
         </div>
         <div className="ndvi-control-field">
-          <label htmlFor="ndvi-state">State or Region</label>
+          <label htmlFor="ndvi-state">{t('ndvi.stateRegion')}</label>
           <select
             id="ndvi-state"
             value={selectedState}
@@ -218,9 +218,9 @@ export default function NDVIAnalysis() {
           </select>
         </div>
         <div className="ndvi-control-field">
-          <label htmlFor="ndvi-district">Optional district detail</label>
+          <label htmlFor="ndvi-district">{t('ndvi.districtDetail')}</label>
           <select id="ndvi-district" value={selectedDistrict} onChange={handleDistrictChange}>
-            <option value="">All districts (state overview)</option>
+            <option value="">{t('ndvi.allDistricts')}</option>
             {districts.map((district) => (
               <option key={district.PCODE} value={district.PCODE}>
                 {getRegionName(district)}
@@ -231,7 +231,7 @@ export default function NDVIAnalysis() {
       </div>
 
       {error && <p className="crop-suggestion-error" role="alert">{error}</p>}
-      {loading && <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>Loading NDVI data…</p>}
+      {loading && <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>{t('ndvi.loadingData')}</p>}
 
       <div className="grid grid-cols-3" style={{ gap: '1rem', marginBottom: '2rem' }}>
         <div className="glass-panel">

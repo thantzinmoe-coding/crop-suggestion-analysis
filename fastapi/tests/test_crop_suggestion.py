@@ -17,7 +17,6 @@ async def test_crop_suggestion() -> None:
                 "name_en": "Rice",
                 "match_score": 94.5,
                 "market_price_mmk_per_kg": 1500,
-                "yield_per_acre_kg": 2000,
                 "description": "Rice description",
             },
             {
@@ -25,7 +24,6 @@ async def test_crop_suggestion() -> None:
                 "name_en": "Corn",
                 "match_score": 88.0,
                 "market_price_mmk_per_kg": 1000,
-                "yield_per_acre_kg": 1800,
                 "description": "Corn description",
             },
         ],
@@ -41,28 +39,15 @@ async def test_crop_suggestion() -> None:
             )
 
     assert response.status_code == 200
-    assert response.json() == {
-        "crop": "Rice",
-        "confidencePercent": 94.5,
-        "recommendations": [
-            {
-                "crop": "Rice",
-                "cropKey": "Rice",
-                "suitabilityPercent": 94.5,
-                "marketPriceMmkPerKg": 1500.0,
-                "yieldPerAcreKg": 2000.0,
-                "description": "Rice description",
-            },
-            {
-                "crop": "Corn",
-                "cropKey": "Corn",
-                "suitabilityPercent": 88.0,
-                "marketPriceMmkPerKg": 1000.0,
-                "yieldPerAcreKg": 1800.0,
-                "description": "Corn description",
-            },
-        ],
-    }
+    body = response.json()
+    assert body["crop"] == "Rice"
+    assert body["confidencePercent"] == 94.5
+    assert body["recommendations"][0]["cropKey"] == "Rice"
+    assert body["recommendations"][0]["marketPriceMmkPerKg"] == 1500.0
+    assert body["recommendations"][1]["cropKey"] == "Corn"
+    assert "marketPriceSource" in body["recommendations"][0]
+    assert "yieldPerAcreKg" not in body["recommendations"][0]
+    assert "estimatedRevenueMmk" not in body["recommendations"][0]
 
 
 @pytest.mark.asyncio

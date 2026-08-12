@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from app.services.market_prices import latest_market_price
+
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "plants.csv"
 MYANMAR_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "plants_mm.csv"
 TOWNSHIP_DATA_PATH = (
@@ -128,6 +130,18 @@ def recommend_plants(
                 "market_price_mmk_per_kg": str(
                     plant.get("Current_Market_Price_MMK_per_kg", "")
                 ).strip(),
+                "water_need_liters_per_day": float(
+                    pd.to_numeric(
+                        plant.get("water_necessity (1Lcup/day)"), errors="coerce"
+                    )
+                    if pd.notna(plant.get("water_necessity (1Lcup/day)"))
+                    else 0
+                ),
+                "sunlight": str(plant.get("sunlight", "")).strip(),
+                "growth_period_years": (
+                    f"{plant.get('shortest_growth_period(year)', '')}–"
+                    f"{plant.get('longest_growth_period(year)', '')}"
+                ).strip("–"),
             }
         )
     return results
@@ -137,8 +151,10 @@ def recommend_crops(
     soil_ph: float,
     rainfall_mm: float,
     temperature_c: float,
+    admin1: str | None = None,
+    admin2: str | None = None,
     language: str = "en",
-    limit: int = 2,
+    limit: int = 3,
 ) -> list[dict[str, object]]:
     try:
         history = pd.read_csv(TOWNSHIP_DATA_PATH)
@@ -158,8 +174,8 @@ def recommend_crops(
     history["crop_key"] = history["best_crop"].astype(str).str.casefold()
 
     for recommendation in recommendations:
-        crop_key = str(recommendation["name_en"]).casefold()
-        crop_history = history[history["crop_key"] == crop_key]
+        crop_key = str(recommendation["name_en"])
+        crop_history = history[history["crop_key"] == crop_key.casefold()]
         raw_plant_price = str(
             recommendation.get("market_price_mmk_per_kg", "")
         ).replace(",", "").strip()
@@ -167,27 +183,34 @@ def recommend_crops(
             plant_price = round(float(raw_plant_price)) if raw_plant_price else 0
         except ValueError:
             plant_price = 0
-        prices = (
-            pd.to_numeric(crop_history["local_grain_price"], errors="coerce").dropna()
-            if "local_grain_price" in crop_history
-            else pd.Series(dtype=float)
-        )
-        yields = (
-            pd.to_numeric(
-                crop_history["historic_yield_tons_per_ha"],
-                errors="coerce",
-            ).dropna()
-            if "historic_yield_tons_per_ha" in crop_history
-            else pd.Series(dtype=float)
-        )
+        prices = pd.to_numeric(
+            crop_history["local_grain_price"], errors="coerce"
+        ).dropna()
         township_price = round(float(prices.mean())) if not prices.empty else 0
-        recommendation["market_price_mmk_per_kg"] = plant_price or township_price
-        township_yield = (
-            round(float(yields.mean()) * 404.686, 1)
-            if not yields.empty
-            else 0
+        market = latest_market_price(crop_key, admin1=admin1, admin2=admin2)
+        price = (
+            float(market["price_mmk_per_kg"])
+            if market
+            else float(plant_price or township_price)
         )
-        recommendation["yield_per_acre_kg"] = township_yield
+        price_source = (
+            market.get("source", "WFP Myanmar Food Prices")
+            if market
+            else ("Project market dataset" if plant_price else "Township agriculture history")
+        )
+        recommendation.update(
+            {
+                "estimated_capacity": recommendation["estimated_capacity"],
+                "description": (
+                    recommendation["description"]
+                ),
+                "market_price_mmk_per_kg": price,
+                "market_price_source": price_source,
+                "market_price_observed_date": market.get("observed_date") if market else None,
+                "market_name": market.get("market_name") if market else None,
+                "market_price_is_dynamic": bool(market),
+            }
+        )
 
     feature_names = ["soil_pH", "rainfall_mm", "temperature_c"]
     conditions = pd.Series(
@@ -215,14 +238,13 @@ def recommend_crops(
             0,
             min(98, 99 * exp(-0.2 * float(nearest["distance"].mean()))),
         )
-        prices = pd.to_numeric(
-            nearest["local_grain_price"],
-            errors="coerce",
-        ).dropna()
-        yields = pd.to_numeric(
-            nearest["historic_yield_tons_per_ha"],
-            errors="coerce",
-        ).dropna()
+        prices = pd.to_numeric(nearest["local_grain_price"], errors="coerce").dropna()
+        market = latest_market_price(crop_name, admin1=admin1, admin2=admin2)
+        price = (
+            float(market["price_mmk_per_kg"])
+            if market
+            else (round(float(prices.mean())) if not prices.empty else 0)
+        )
         township_candidates.append(
             {
                 "name": (
@@ -237,23 +259,30 @@ def recommend_crops(
                     f"{crop_name} is supported by similar township soil "
                     "and climate records."
                 ),
-                "market_price_mmk_per_kg": (
-                    round(float(prices.mean()))
-                    if not prices.empty
-                    else 0
+                "market_price_mmk_per_kg": price,
+                "market_price_source": (
+                    market.get("source", "Township agriculture history")
+                    if market
+                    else "Township agriculture history"
                 ),
-                "yield_per_acre_kg": (
-                    round(float(yields.mean()) * 404.686, 1)
-                    if not yields.empty
-                    else 0
-                ),
+                "market_price_observed_date": market.get("observed_date") if market else None,
+                "market_name": market.get("market_name") if market else None,
+                "market_price_is_dynamic": bool(market),
             }
         )
 
     recommendations.extend(township_candidates)
 
+    # Do not show a crop that cannot be valued.  A price may come from the
+    # latest WFP observation or from the local township history fallback, but
+    # zero/blank prices are never useful to the crop-planning UI.
+    priced_recommendations = [
+        recommendation
+        for recommendation in recommendations
+        if float(recommendation.get("market_price_mmk_per_kg", 0) or 0) > 0
+    ]
     return sorted(
-        recommendations,
+        priced_recommendations,
         key=lambda recommendation: float(recommendation["match_score"]),
         reverse=True,
     )[:limit]
