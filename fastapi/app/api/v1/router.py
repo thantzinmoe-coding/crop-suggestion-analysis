@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints.analytics import router as analytics_router
+from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.chat import router as chat_router
 from app.api.v1.endpoints.crop_explanation import router as crop_explanation_router
 from app.api.v1.endpoints.crop_profiles import router as crop_profiles_router
@@ -13,6 +14,7 @@ from app.api.v1.endpoints.regions import router as regions_router
 
 api_router = APIRouter()
 api_router.include_router(analytics_router)
+api_router.include_router(auth_router)
 api_router.include_router(chat_router)
 api_router.include_router(crop_explanation_router)
 api_router.include_router(crop_profiles_router)

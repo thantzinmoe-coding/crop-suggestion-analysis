@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, Lock, ArrowRight, Loader2, AlertCircle, X, UserRound } from 'lucide-react'
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle, X, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
 import GreenVistaMark from './GreenVistaMark.jsx'
@@ -9,6 +9,8 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   
@@ -32,17 +34,27 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
       setError('')
       setLoading(true)
       
-      await new Promise(resolve => setTimeout(resolve, 800))
-      
       if (mode === 'signin') {
-        login(email, password)
+        await login(email, password)
       } else {
-        register(email, password)
+        await register(email, password)
       }
       
       onSuccess()
     } catch (err) {
-      setError(err.message)
+      const messageKey = err.status === 409
+        ? 'auth.userExists'
+        : err.status === 401
+          ? 'auth.invalidCredentials'
+          : err.status === 422 && String(err.message).toLowerCase().includes('email')
+            ? 'auth.emailInvalid'
+          : err.status === 422 && (
+            String(err.message).toLowerCase().includes('password') ||
+            String(err.message).toLowerCase().includes('at least 8')
+          )
+              ? 'auth.passwordTooShort'
+              : null
+      setError(messageKey ? t(messageKey) : err.message)
     } finally {
       setLoading(false)
     }
@@ -118,15 +130,16 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <label className="block text-sm font-semibold text-myanglow-navy">
               {t('auth.email') || 'Email Address'}
-              <span className="mt-2 flex items-center gap-3 rounded-2xl border border-myanglow-sage bg-white px-4 focus-within:border-myanglow-medium focus-within:ring-4 focus-within:ring-myanglow-sage/30">
-                <Mail size={17} className="text-myanglow-medium" />
+              <span className="relative mt-2 flex h-14 items-center rounded-2xl border border-myanglow-sage bg-white px-4 focus-within:border-myanglow-medium focus-within:ring-4 focus-within:ring-myanglow-sage/30">
+                <Mail size={17} className="pointer-events-none absolute left-4 text-myanglow-medium" />
                 <input 
                   required 
                   type="email" 
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="farmer@greenvista.com" 
-                  className="w-full border-0 bg-transparent py-3.5 text-sm font-normal outline-none" 
+                  className="h-full min-w-0 w-full appearance-none border-0 bg-transparent pl-8 text-sm font-normal outline-none"
                   disabled={loading}
                 />
               </span>
@@ -134,34 +147,52 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
 
             <label className="block text-sm font-semibold text-myanglow-navy">
               {t('auth.password') || 'Password'}
-              <span className="mt-2 flex items-center gap-3 rounded-2xl border border-myanglow-sage bg-white px-4 focus-within:border-myanglow-medium focus-within:ring-4 focus-within:ring-myanglow-sage/30">
-                <Lock size={17} className="text-myanglow-medium" />
+              <span className="relative mt-2 flex h-14 items-center rounded-2xl border border-myanglow-sage bg-white px-4 focus-within:border-myanglow-medium focus-within:ring-4 focus-within:ring-myanglow-sage/30">
+                <Lock size={17} className="pointer-events-none absolute left-4 text-myanglow-medium" />
                 <input 
                   required 
-                  type="password" 
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••" 
-                  className="w-full border-0 bg-transparent py-3.5 text-sm font-normal outline-none" 
+                  className="h-full min-w-0 w-full appearance-none border-0 bg-transparent pl-8 pr-8 text-sm font-normal outline-none"
                   disabled={loading}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(value => !value)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-slate-400 shadow-none outline-none transition hover:bg-transparent hover:text-myanglow-forest focus:bg-transparent focus:outline-none focus:ring-0"
+                >
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
               </span>
             </label>
 
             {mode === 'signup' && (
               <label className="block text-sm font-semibold text-myanglow-navy">
                 {t('auth.confirmPassword') || 'Confirm Password'}
-                <span className="mt-2 flex items-center gap-3 rounded-2xl border border-myanglow-sage bg-white px-4 focus-within:border-myanglow-medium focus-within:ring-4 focus-within:ring-myanglow-sage/30">
-                  <Lock size={17} className="text-myanglow-medium" />
-                  <input 
-                    required 
-                    type="password" 
+                <span className="relative mt-2 flex h-14 items-center rounded-2xl border border-myanglow-sage bg-white px-4 focus-within:border-myanglow-medium focus-within:ring-4 focus-within:ring-myanglow-sage/30">
+                  <Lock size={17} className="pointer-events-none absolute left-4 text-myanglow-medium" />
+                  <input
+                    required
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••" 
-                    className="w-full border-0 bg-transparent py-3.5 text-sm font-normal outline-none" 
+                    className="h-full min-w-0 w-full appearance-none border-0 bg-transparent pl-8 pr-8 text-sm font-normal outline-none"
                     disabled={loading}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(value => !value)}
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-slate-400 shadow-none outline-none transition hover:bg-transparent hover:text-myanglow-forest focus:bg-transparent focus:outline-none focus:ring-0"
+                  >
+                    {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
                 </span>
               </label>
             )}
@@ -176,6 +207,17 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
               )}
             </button>
           </form>
+
+          <p className="mt-5 text-center text-sm text-slate-500">
+            {mode === 'signin' ? t('auth.noAccount') : t('auth.haveAccount')}{' '}
+            <button
+              type="button"
+              onClick={() => changeMode(mode === 'signin' ? 'signup' : 'signin')}
+              className="font-semibold text-myanglow-forest underline underline-offset-2 hover:text-myanglow-medium"
+            >
+              {mode === 'signin' ? t('auth.switchSignup') : t('auth.switchSignin')}
+            </button>
+          </p>
         </div>
       </section>
     </div>

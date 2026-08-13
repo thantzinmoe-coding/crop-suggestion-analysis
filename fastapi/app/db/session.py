@@ -26,6 +26,7 @@ async def ensure_indexes() -> None:
     await database.ndvi_measurements.create_index(
         [("region_pcode", 1), ("observation_date", 1)], unique=True
     )
+    await database.users.create_index("email", unique=True)
 
 
 async def close_database() -> None:

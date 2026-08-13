@@ -166,6 +166,11 @@ const translations = {
     "auth.email": "Email Address",
     "auth.password": "Password",
     "auth.confirmPassword": "Confirm Password",
+    "auth.invalidCredentials": "Invalid email or password.",
+    "auth.noAccount": "Don't have an account?",
+    "auth.haveAccount": "Already have an account?",
+    "auth.switchSignup": "Sign Up",
+    "auth.switchSignin": "Sign In",
   },
   my: {
     "nav.landing": "ပင်မစာမျက်နှာ",
@@ -333,6 +338,20 @@ Object.assign(myOverrides, {
   "ndvi.districtDetail": "ခရိုင် အသေးစိတ် (စိတ်ကြိုက်)",
   "ndvi.allDistricts": "ခရိုင်အားလုံး (ပြည်နယ်/တိုင်း အကျဉ်းချုပ်)",
   "ndvi.loadingData": "NDVI အချက်အလက်များ ရယူနေပါသည်..."
+});
+
+Object.assign(myOverrides, {
+  "auth.fillFields": "အချက်အလက်အားလုံးကို ဖြည့်စွက်ပါ။",
+  "auth.passwordMismatch": "စကားဝှက်များ မကိုက်ညီပါ။",
+  "auth.userExists": "ဤအီးမေးလ်ဖြင့် အကောင့်ရှိပြီးသားဖြစ်ပါသည်။",
+  "auth.invalidCredentials": "အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်။",
+  "auth.emailInvalid": "မှန်ကန်သော အီးမေးလ်လိပ်စာကို ထည့်သွင်းပါ။",
+  "auth.passwordTooShort": "စကားဝှက်သည် အနည်းဆုံး စာလုံး ၈ လုံး ရှိရပါမည်။",
+  "auth.emailDeliveryFailed": "အကောင့်ဖန်တီးပြီးပါပြီ၊ သို့သော် အီးမေးလ်ပို့၍ မရပါ။"
+  ,"auth.noAccount": "အကောင့်မရှိသေးပါသလား?"
+  ,"auth.haveAccount": "အကောင့်ရှိပြီးသားလား?"
+  ,"auth.switchSignup": "အကောင့်ဖွင့်ရန်"
+  ,"auth.switchSignin": "အကောင့်ဝင်ရန်"
 });
 
 export function LanguageProvider({ children }) {

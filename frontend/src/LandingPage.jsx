@@ -171,7 +171,14 @@ function LandingPage() {
               </button>
             </div>
           ) : (
-            <button className="agro-pill agro-pill-dark agro-nav-cta" type="button" onClick={() => openWorkspace('signin')}>{t('auth.loginBtn')}</button>
+            <div className="agro-nav-account">
+              <div className="agro-home-language" aria-label="Language selector">
+                <Languages size={18} aria-hidden="true" />
+                <button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
+                <button type="button" className={language === 'my' ? 'active' : ''} aria-pressed={language === 'my'} onClick={() => setLanguage('my')}>MY</button>
+              </div>
+              <button className="agro-pill agro-pill-dark agro-nav-cta" type="button" onClick={() => openWorkspace('signin')}>{t('auth.loginBtn')}</button>
+            </div>
           )}
         </nav>
 

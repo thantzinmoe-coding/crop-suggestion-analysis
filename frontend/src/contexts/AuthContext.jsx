@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { API_BASE_URL } from '../api.js'
 
 const AuthContext = createContext()
 
@@ -19,44 +20,33 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }, [])
 
-  const register = (email, password) => {
-    // Get existing users or empty array
-    const usersStr = localStorage.getItem('agroguard_demo_users')
-    const users = usersStr ? JSON.parse(usersStr) : []
-
-    // Check if user already exists
-    if (users.find(u => u.email === email)) {
-      throw new Error('User already exists with this email.')
+  const authenticate = async (path, email, password) => {
+    const response = await fetch(`${API_BASE_URL}/auth/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const detail = data.detail
+      const message = Array.isArray(detail)
+        ? detail.map(item => item?.msg || item?.message || JSON.stringify(item)).join(', ')
+        : detail && typeof detail === 'object'
+          ? (detail.message || JSON.stringify(detail))
+          : detail
+      const error = new Error(message || 'Authentication failed.')
+      error.status = response.status
+      error.detail = detail
+      throw error
     }
-
-    // Save new user
-    const newUser = { email, password }
-    users.push(newUser)
-    localStorage.setItem('agroguard_demo_users', JSON.stringify(users))
-
-    // Log them in immediately
-    const sessionData = { email }
+    const sessionData = { ...data.user, token: data.token, emailSent: data.email_sent }
     localStorage.setItem('agroguard_session', JSON.stringify(sessionData))
     setCurrentUser(sessionData)
-    
-    return true
+    return data
   }
 
-  const login = (email, password) => {
-    const usersStr = localStorage.getItem('agroguard_demo_users')
-    const users = usersStr ? JSON.parse(usersStr) : []
-
-    const user = users.find(u => u.email === email && u.password === password)
-    if (!user) {
-      throw new Error('Invalid email or password.')
-    }
-
-    const sessionData = { email: user.email }
-    localStorage.setItem('agroguard_session', JSON.stringify(sessionData))
-    setCurrentUser(sessionData)
-    
-    return true
-  }
+  const register = (email, password) => authenticate('register', email, password)
+  const login = (email, password) => authenticate('login', email, password)
 
   const logout = () => {
     localStorage.removeItem('agroguard_session')

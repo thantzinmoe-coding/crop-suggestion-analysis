@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     debug: bool = False
     api_v1_prefix: str = "/api/v1"
     mongodb_url: str = "mongodb://localhost:27017"
-    database_name: str = "agroguard"
+    database_name: str = "greenvista"
     initialize_database: bool = False
     cors_origins: list[str] = ["http://localhost:5173"]
 
@@ -34,6 +34,14 @@ class Settings(BaseSettings):
     cdse_process_url: str = "https://sh.dataspace.copernicus.eu/api/v1/statistics"
     cdse_enabled: bool = False
     cdse_cloud_cover_max: float = 40.0
+
+    # SMTP is optional for local development, but required to send real emails.
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None
+    smtp_from_email: str | None = None
+    smtp_use_tls: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",
