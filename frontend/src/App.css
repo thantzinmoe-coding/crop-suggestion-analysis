@@ -114,6 +114,11 @@ button:disabled { cursor: not-allowed; opacity: .6; }
 .ndvi-controls-heading h3 { margin: .15rem 0 .35rem; color: var(--text); font-size: 1.1rem; }
 .ndvi-controls-heading { min-width: 0; }
 .ndvi-controls-heading p { margin: 0; color: var(--text-muted); font-size: .82rem; line-height: 1.45; }
+.ndvi-map-panel { margin: 1rem 0 2rem; padding: 0; overflow: hidden; }
+.ndvi-map-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.2rem; }
+.ndvi-map-heading p { margin: .25rem 0 0; color: var(--text-muted); font-size: .82rem; }
+.ndvi-map-heading strong { color: var(--primary); font-size: .9rem; }
+.ndvi-map { z-index: 0; width: 100%; height: 360px; }
 .ndvi-controls-kicker { color: var(--primary); font-size: .68rem; font-weight: 800; letter-spacing: .12em; }
 .ndvi-control-field { min-width: 0; }
 .ndvi-controls select { max-width: none; min-height: 3rem; padding-right: 2.25rem; font-weight: 600; }

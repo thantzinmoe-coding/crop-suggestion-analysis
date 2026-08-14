@@ -75,6 +75,10 @@ const translations = {
     "ndvi.title": "NDVI Satellite Analysis",
     "ndvi.subtitle": "Monitor crop health from space! NDVI uses satellite images to measure how green and healthy plants are.",
     "ndvi.selectRegion": "Select Region:",
+    "ndvi.mapTitle": "Choose on map",
+    "ndvi.mapHint": "Click the map to select the nearest analysis region.",
+    "ndvi.mapMyanmar": "Myanmar",
+    "ndvi.outsideMyanmar": "Please click inside Myanmar to select an analysis region.",
     "ndvi.latestVim": "Current Greenness (VIM)",
     "ndvi.avgVim": "Historical Greenness (5yr)",
     "ndvi.latestViq": "Quality vs Average (VIQ)",
@@ -200,6 +204,9 @@ const translations = {
     "ndvi.title": "NDVI ဂြိုလ်တု ခွဲခြမ်းစိတ်ဖြာခြင်း",
     "ndvi.subtitle": "အာကာသမှနေ၍ သီးနှံများ၏ ကျန်းမာရေးကို စောင့်ကြည့်ပါ! NDVI ဆိုတာ ဂြိုလ်တုပုံရိပ်များကို အသုံးပြုပြီး အပင်များ ဘယ်လောက် စိမ်းလန်းကျန်းမာနေသလဲဆိုတာကို တိုင်းတာပေးတာပါ။",
     "ndvi.selectRegion": "ဒေသရွေးချယ်ပါ:",
+    "ndvi.mapTitle": "မြေပုံပေါ်မှ ရွေးချယ်ပါ",
+    "ndvi.mapHint": "မြေပုံပေါ်တွင် နှိပ်၍ အနီးဆုံး ခွဲခြမ်းစိတ်ဖြာမည့် ဒေသကို ရွေးချယ်ပါ။",
+    "ndvi.mapMyanmar": "မြန်မာနိုင်ငံ",
     "ndvi.latestVim": "လက်ရှိ စိမ်းလန်းမှု (VIM)",
     "ndvi.avgVim": "ယခင် စိမ်းလန်းမှု (၅ နှစ်)",
     "ndvi.latestViq": "ယခင်နှစ်များနှင့် နှိုင်းယှဉ်ချက် (VIQ)",
@@ -289,6 +296,7 @@ const translations = {
 };
 
 const myOverrides = {
+  "ndvi.outsideMyanmar": "မြန်မာနိုင်ငံအတွင်းကို နှိပ်၍ ခွဲခြမ်းစိတ်ဖြာမည့် ဒေသကို ရွေးချယ်ပါ။",
   "ndvi.location": "NDVI တည်နေရာ",
   "ndvi.stateRegion": "ပြည်နယ် သို့မဟုတ် တိုင်းဒေသကြီး",
   "ndvi.districtDetail": "ခရိုင်အသေးစိတ် (ရွေးချယ်နိုင်သည်)",

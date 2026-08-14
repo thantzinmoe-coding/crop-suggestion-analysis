@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Satellite, Leaf, TrendingUp, Info } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
+import { GeoJSON, MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useLanguage, pcodeMap } from '../contexts/LanguageContext';
 import { API_BASE_URL } from '../api';
 import {
@@ -27,15 +30,43 @@ ChartJS.register(
   Filler
 );
 
+const defaultMapCenter = [20.0, 96.0];
+const mapIcon = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41],
+});
+
+function MapController({ position }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) map.setView(position, Math.max(map.getZoom(), 7));
+  }, [map, position]);
+  return null;
+}
+
+function MapClickSelector({ regions, onOutside }) {
+  useMapEvents({
+    click(event) {
+      onOutside(event.latlng);
+    },
+  });
+  return null;
+}
+
 export default function NDVIAnalysis() {
   const { t, language } = useLanguage();
   const [regions, setRegions] = useState([]);
+  const [boundaries, setBoundaries] = useState(null);
   const [selectedState, setSelectedState] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedPcode, setSelectedPcode] = useState('');
   const [ndviData, setNdviData] = useState({ labels: [], vim: [], viq: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [mapWarning, setMapWarning] = useState('');
+  const [mapMarkerPosition, setMapMarkerPosition] = useState(defaultMapCenter);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -52,6 +83,8 @@ export default function NDVIAnalysis() {
         const firstState = availableRegions.find((region) => !region.PCODE.includes('D'))?.PCODE || availableRegions[0]?.PCODE || '';
         setSelectedState((current) => current || firstState);
         setSelectedPcode((current) => current || firstState);
+        const boundaryResponse = await axios.get(`${API_BASE_URL}/analytics/ndvi-boundaries`, { signal: controller.signal });
+        setBoundaries(boundaryResponse.data || null);
       } catch (err) {
         if (err.code !== 'ERR_CANCELED') {
           console.error('NDVI regions error:', err);
@@ -76,17 +109,45 @@ export default function NDVIAnalysis() {
     return region.PCODE;
   };
 
+  const selectedRegion = regions.find((region) => region.PCODE === selectedPcode) || regions.find((region) => region.PCODE === selectedState);
+  const mapPosition = selectedRegion && Number.isFinite(selectedRegion.latitude)
+    ? [selectedRegion.latitude, selectedRegion.longitude]
+    : defaultMapCenter;
+
+  const selectRegionFromMap = (region, clickedPosition = null) => {
+    const pcode = String(region.PCODE || region.pcode || '').trim();
+    const matchedRegion = regions.find((item) => item.PCODE === pcode);
+    if (!matchedRegion) return;
+    setMapWarning('');
+    const level = matchedRegion.level || (pcode.includes('D') ? 'district' : 'state');
+    const statePcode = level === 'district'
+      ? (matchedRegion.state_pcode || pcode.split('D')[0])
+      : pcode;
+    setSelectedState(statePcode || pcode);
+    setSelectedDistrict(level === 'district' ? pcode : '');
+    setSelectedPcode(pcode);
+    setMapMarkerPosition(clickedPosition || [matchedRegion.latitude, matchedRegion.longitude]);
+  };
+
+  const handleOutsideMapClick = () => {
+    setMapWarning(t('ndvi.outsideMyanmar'));
+  };
+
   const handleStateChange = (event) => {
     const nextState = event.target.value;
+    const nextRegion = regions.find((region) => region.PCODE === nextState);
     setSelectedState(nextState);
     setSelectedDistrict('');
     setSelectedPcode(nextState);
+    if (nextRegion) setMapMarkerPosition([nextRegion.latitude, nextRegion.longitude]);
   };
 
   const handleDistrictChange = (event) => {
     const nextDistrict = event.target.value;
+    const nextRegion = regions.find((region) => region.PCODE === (nextDistrict || selectedState));
     setSelectedDistrict(nextDistrict);
     setSelectedPcode(nextDistrict || selectedState);
+    if (nextRegion) setMapMarkerPosition([nextRegion.latitude, nextRegion.longitude]);
   };
 
   useEffect(() => {
@@ -230,6 +291,40 @@ export default function NDVIAnalysis() {
         </div>
       </div>
 
+      <div className="glass-panel ndvi-map-panel">
+        <div className="ndvi-map-heading">
+          <div>
+            <div className="ndvi-controls-kicker">{t('ndvi.mapTitle')}</div>
+            <p>{t('ndvi.mapHint')}</p>
+          </div>
+          <strong>{selectedRegion ? getRegionName(selectedRegion) : t('ndvi.mapMyanmar')}</strong>
+        </div>
+        <MapContainer center={defaultMapCenter} zoom={6} scrollWheelZoom className="ndvi-map">
+          <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <MapController position={mapMarkerPosition} />
+          <MapClickSelector regions={regions} onOutside={handleOutsideMapClick} />
+          {boundaries && (
+            <GeoJSON
+              data={boundaries}
+              style={() => ({ color: '#14742f', weight: 1, fillColor: '#8bcf77', fillOpacity: 0.18 })}
+              onEachFeature={(feature, layer) => {
+                layer.bindTooltip(language === 'my' ? feature.properties.name_my : feature.properties.name_en);
+                layer.on('click', (event) => {
+                  // Keep a polygon click from reaching the map-level fallback selector.
+                  L.DomEvent.stopPropagation(event.originalEvent);
+                  selectRegionFromMap(
+                    feature.properties,
+                    [event.latlng.lat, event.latlng.lng]
+                  );
+                });
+              }}
+            />
+          )}
+          <Marker position={mapMarkerPosition} icon={mapIcon} />
+        </MapContainer>
+      </div>
+
+      {mapWarning && <p className="crop-suggestion-error" role="alert">{mapWarning}</p>}
       {error && <p className="crop-suggestion-error" role="alert">{error}</p>}
       {loading && <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>{t('ndvi.loadingData')}</p>}
 

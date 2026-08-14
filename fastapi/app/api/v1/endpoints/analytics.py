@@ -7,6 +7,7 @@ from app.services.agriculture_data import (
     dataset_summary,
     ndvi_rainfall_correlation,
     ndvi_regions,
+    ndvi_boundaries,
     ndvi_series,
 )
 
@@ -46,6 +47,11 @@ def get_ndvi_regions():
 @router.get("/ndvi-data")
 def get_ndvi_data(pcode: str | None = Query(default=None)):
     return _run(lambda: ndvi_series(pcode))
+
+
+@router.get("/ndvi-boundaries")
+def get_ndvi_boundaries():
+    return _run(ndvi_boundaries)
 
 
 @router.get("/ndvi-rainfall-correlation")

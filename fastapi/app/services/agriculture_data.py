@@ -1,10 +1,23 @@
 from functools import lru_cache
+import json
 from pathlib import Path
 
 import pandas as pd
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 PROJECT_DATA_DIR = Path(__file__).resolve().parents[3] / "datasets"
+BOUNDARY_PATH = PROJECT_DATA_DIR / "geoserver-GetFeature.application"
+
+# Approximate administrative-region centers for map navigation. These points
+# select an analysis region; they are not parcel-level boundary coordinates.
+REGION_CENTERS = {
+    "MMR001": (22.0, 95.3), "MMR002": (18.3, 96.5), "MMR003": (20.15, 94.9),
+    "MMR004": (21.98, 96.08), "MMR005": (12.1, 99.0), "MMR006": (16.8, 95.2),
+    "MMR007": (25.4, 97.4), "MMR008": (19.3, 97.2), "MMR009": (16.7, 97.6),
+    "MMR010": (22.0, 93.6), "MMR011": (16.5, 97.7), "MMR012": (19.8, 93.0),
+    "MMR013": (23.7, 97.0), "MMR014": (16.85, 96.2), "MMR015": (19.75, 96.1),
+    "MMR016": (21.2, 97.0), "MMR017": (20.8, 100.0), "MMR018": (17.3, 96.7),
+}
 
 
 class AgricultureDatasetError(RuntimeError):
@@ -73,8 +86,18 @@ def load_region_names() -> dict[str, dict[str, str]]:
     """Load authoritative Myanmar PCODE names from the added boundary workbook."""
     path = PROJECT_DATA_DIR / "mmr_admin_boundaries.xlsx"
     try:
-        states = pd.read_excel(path, sheet_name="mmr_admin1", usecols="A:E")
-        districts = pd.read_excel(path, sheet_name="mmr_admin2", usecols="A:B,E:J")
+        states = pd.read_excel(
+            path,
+            sheet_name="mmr_admin1",
+            usecols=["adm1_name", "adm1_name1", "adm1_pcode", "center_lat", "center_lon"],
+        )
+        districts = pd.read_excel(
+            path,
+            sheet_name="mmr_admin2",
+            usecols=[
+                "adm2_name", "adm2_name1", "adm2_pcode", "adm1_pcode", "center_lat", "center_lon"
+            ],
+        )
         names: dict[str, dict[str, str]] = {}
         for _, row in states.iterrows():
             pcode = str(row["adm1_pcode"]).strip()
@@ -83,6 +106,8 @@ def load_region_names() -> dict[str, dict[str, str]]:
                     "name_en": str(row["adm1_name"]).strip(),
                     "name_my": str(row["adm1_name1"]).strip(),
                     "level": "state",
+                    "latitude": float(row["center_lat"]),
+                    "longitude": float(row["center_lon"]),
                 }
         for _, row in districts.iterrows():
             pcode = str(row["adm2_pcode"]).strip()
@@ -92,6 +117,8 @@ def load_region_names() -> dict[str, dict[str, str]]:
                     "name_my": str(row["adm2_name1"]).strip(),
                     "state_pcode": str(row["adm1_pcode"]).strip(),
                     "level": "district",
+                    "latitude": float(row["center_lat"]),
+                    "longitude": float(row["center_lon"]),
                 }
         return names
     except (OSError, ImportError, KeyError, ValueError):
@@ -152,7 +179,43 @@ def ndvi_regions() -> list[dict]:
     names = load_region_names()
     for region in regions:
         region.update(names.get(region["PCODE"], {}))
+        parent = region["PCODE"].split("D", 1)[0]
+        latitude, longitude = REGION_CENTERS.get(parent, (20.0, 96.0))
+        region.setdefault("latitude", latitude)
+        region.setdefault("longitude", longitude)
     return regions
+
+
+@lru_cache(maxsize=1)
+def ndvi_boundaries() -> dict:
+    """Return district polygons from the GeoServer GeoJSON export."""
+    try:
+        with BOUNDARY_PATH.open(encoding="utf-8") as file:
+            source = json.load(file)
+        names = load_region_names()
+        features = []
+        for feature in source.get("features", []):
+            properties = feature.get("properties", {})
+            pcode = str(properties.get("DT_PCODE", "")).strip()
+            state_pcode = str(properties.get("ST_PCODE", "")).strip()
+            if not pcode or not feature.get("geometry"):
+                continue
+            name = names.get(pcode, {})
+            features.append({
+                "type": "Feature",
+                "id": pcode,
+                "geometry": feature["geometry"],
+                "properties": {
+                    "PCODE": pcode,
+                    "state_pcode": state_pcode,
+                    "level": "district",
+                    "name_en": name.get("name_en", pcode),
+                    "name_my": name.get("name_my", pcode),
+                },
+            })
+        return {"type": "FeatureCollection", "features": features}
+    except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
+        raise AgricultureDatasetError(f"Unable to load boundary GeoJSON: {BOUNDARY_PATH}") from exc
 
 
 def ndvi_series(pcode: str | None = None) -> dict:
