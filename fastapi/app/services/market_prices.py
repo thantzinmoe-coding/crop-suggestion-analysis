@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-PROJECT_DATA_DIR = Path(__file__).resolve().parents[3] / "datasets"
+PROJECT_DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 WFP_PRICES_PATH = PROJECT_DATA_DIR / "wfp_food_prices_mmr.csv"
 
 _CROP_ALIASES = {

@@ -7,8 +7,10 @@ from app.schemas.base import APIModel
 
 class CropSuggestionRequest(BaseModel):
     soil_ph: float = Field(alias="soil_pH", ge=0, le=14)
-    rainfall_mm: float = Field(ge=0)
+    rainfall_mm: float = Field(ge=0, le=10_000)
     temperature_c: float = Field(ge=-50, le=70)
+    humidity_pct: float | None = Field(default=None, ge=0, le=100)
+    field_area_acres: float = Field(default=1, gt=0, le=100_000)
     admin1: str | None = None
     admin2: str | None = None
     language: Literal["en", "my"] = "en"

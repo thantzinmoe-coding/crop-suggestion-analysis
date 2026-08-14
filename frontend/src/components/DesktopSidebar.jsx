@@ -1,4 +1,4 @@
-import { Bot, Home, Languages, LogOut, Radar, Sprout } from 'lucide-react'
+import { Bot, Home, Languages, LogIn, LogOut, Radar, Sprout, UserRound } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
@@ -49,11 +49,24 @@ function DesktopSidebar() {
           <button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button>
           <button type="button" className={language === 'my' ? 'active' : ''} onClick={() => setLanguage('my')}>MY</button>
         </div>
-        {currentUser?.email && <p className="gv-sidebar-email" title={currentUser.email}>{currentUser.email}</p>}
-        <button className="gv-sidebar-signout" type="button" onClick={handleLogout}>
-          <LogOut size={17} aria-hidden="true" />
-          {t('auth.logout') || 'Sign out'}
-        </button>
+        {currentUser ? (
+          <>
+            {currentUser.email && <p className="gv-sidebar-email" title={currentUser.email}>{currentUser.email}</p>}
+            <button className="gv-sidebar-signout" type="button" onClick={() => navigate('/account')}>
+              <UserRound size={17} aria-hidden="true" />
+              {t('account.title') || 'My account'}
+            </button>
+            <button className="gv-sidebar-signout" type="button" onClick={handleLogout}>
+              <LogOut size={17} aria-hidden="true" />
+              {t('auth.logout') || 'Sign out'}
+            </button>
+          </>
+        ) : (
+          <button className="gv-sidebar-signout" type="button" onClick={() => navigate('/?auth=signin')}>
+            <LogIn size={17} aria-hidden="true" />
+            {t('auth.loginBtn') || 'Sign in'}
+          </button>
+        )}
       </div>
     </aside>
   )

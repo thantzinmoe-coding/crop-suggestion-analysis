@@ -31,8 +31,10 @@ def crop_suggestion(request: CropSuggestionRequest) -> CropSuggestionResponse:
             request.soil_ph,
             request.rainfall_mm,
             request.temperature_c,
+            field_area_acres=request.field_area_acres,
             admin1=request.admin1,
             admin2=request.admin2,
+            humidity_pct=request.humidity_pct,
             language=request.language,
             limit=3,
         )
@@ -65,7 +67,7 @@ def crop_suggestion(request: CropSuggestionRequest) -> CropSuggestionResponse:
                 "market_price_observed_date": recommendation.get("market_price_observed_date"),
                 "market_name": recommendation.get("market_name"),
                 "market_price_is_dynamic": recommendation.get("market_price_is_dynamic", False),
-                "water_need_liters_per_day": recommendation.get("water_need_liters_per_day"),
+                "water_need_liters_per_day": None,
                 "sunlight": recommendation.get("sunlight"),
                 "growth_period_years": recommendation.get("growth_period_years"),
             }

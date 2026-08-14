@@ -121,8 +121,8 @@ function LandingPage() {
     if (mode === 'signin' || mode === 'signup') setAuthMode(mode)
   }, [location])
 
-  const openWorkspace = (mode = 'signup', path = '/crop-suggestion') => {
-    if (currentUser) navigate(path)
+  const openWorkspace = (mode = 'signup', path = null) => {
+    if (currentUser || path) navigate(path || '/crop-suggestion')
     else setAuthMode(mode)
   }
 
@@ -264,7 +264,7 @@ function LandingPage() {
       </section>
 
       {authMode && (
-        <AuthModal initialMode={authMode} onClose={closeAuth} onSuccess={() => navigate('/crop-suggestion')} />
+        <AuthModal initialMode={authMode} onClose={closeAuth} onSuccess={({ newAccount }) => navigate(newAccount ? '/account' : '/crop-suggestion')} />
       )}
     </main>
   )

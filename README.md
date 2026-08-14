@@ -129,6 +129,6 @@ on revisit timing and cloud cover, so this is near-real-time rather than instant
 
 ### Crop suggestion data
 
-`POST /api/v1/crop-suggestion` uses `fastapi/app/data/plants.csv` for climate-based
+`POST /api/v1/crop-suggestion` uses `fastapi/app/data/crop_dataset.xls` for crop-criteria-based
 matching. Market prices come from the repository’s WFP price data and project price
 history. Crops without an available price are excluded from suggestions.

@@ -1,0 +1,265 @@
+plant_id	plant_name	lowest_temp	highest_temp	soil_ph_min	soil_ph_max	rainfall_min	rainfall_max	humidity_min	humidity_max	water_need	Unnamed: 11	plant_name.1
+1	Mint	15	25	5.9	6.8	798	1173	57	78	High		Mint
+1	Mint	15	27	6.1	7.1	826	1236	59	78	High		Mint
+1	Mint	15	24	5.8	7.1	780	1200	57	80	High		Mint
+2	Basil	17	31	5.8	7.5	630	963	52	72	Medium		Basil
+2	Basil	19	32	5.8	7.3	626	1032	52	74	Medium		Basil
+2	Basil	19	30	6.1	7.4	580	1039	52	77	Medium		Basil
+3	Coriander	14	26	6.3	7.7	472	831	52	69	Medium		Coriander
+3	Coriander	16	25	6.3	7.3	493	762	51	68	Medium		Coriander
+3	Coriander	16	25	6.1	7.5	509	772	53	73	Medium		Coriander
+4	Tomato	19	30	5.9	7.0	596	1208	52	68	Medium		Tomato
+4	Tomato	17	31	5.9	6.6	612	1224	49	72	Medium		Tomato
+4	Tomato	18	30	6.0	6.9	626	1183	51	69	Medium		Tomato
+5	Chilli	21	31	6.1	7.1	606	999	51	72	Medium		Chilli
+5	Chilli	21	31	5.9	7.1	607	988	51	69	Medium		Chilli
+5	Chilli	20	33	6.0	7.1	603	991	47	73	Medium		Chilli
+6	Eggplant	20	34	5.5	6.6	703	1198	63	78	Medium		Eggplant
+6	Eggplant	20	32	5.4	6.9	670	1232	59	80	Medium		Eggplant
+6	Eggplant	21	34	5.5	6.6	722	1177	60	82	Medium		Eggplant
+7	Cabbage	15	21	6.0	6.9	471	889	63	78	Medium		Cabbage
+7	Cabbage	14	22	6.0	6.6	522	939	57	82	Medium		Cabbage
+7	Cabbage	14	23	6.1	7.0	474	918	60	82	Medium		Cabbage
+8	Onion	14	25	6.0	7.0	418	715	48	65	Medium		Onion
+8	Onion	13	26	5.9	7.2	373	751	51	63	Medium		Onion
+8	Onion	14	25	6.1	6.9	386	723	47	65	Medium		Onion
+9	Garlic	13	23	6.2	7.3	401	722	47	67	Low		Garlic
+9	Garlic	11	26	6.0	7.5	416	690	53	66	Low		Garlic
+9	Garlic	13	24	6.1	7.5	374	706	52	65	Low		Garlic
+10	Potato	15	20	4.9	6.3	515	833	59	83	Medium		Potato
+10	Potato	15	22	5.0	6.6	515	811	57	77	Medium		Potato
+10	Potato	14	20	5.0	6.7	496	835	59	82	Medium		Potato
+11	Ginger	19	30	5.6	6.7	1483	2505	73	89	High		Ginger
+11	Ginger	19	28	5.5	6.5	1477	2518	73	90	High		Ginger
+11	Ginger	20	28	5.3	6.4	1476	2462	69	92	High		Ginger
+12	Turmeric	19	32	5.4	6.4	1513	2195	69	87	High		Turmeric
+12	Turmeric	20	29	5.5	6.5	1509	2207	69	88	High		Turmeric
+12	Turmeric	21	32	5.6	6.4	1518	2196	69	86	High		Turmeric
+13	Pumpkin	17	31	6.1	7.6	506	938	52	72	Medium		Pumpkin
+13	Pumpkin	19	30	6.0	7.4	491	927	48	73	Medium		Pumpkin
+13	Pumpkin	18	31	5.9	7.5	485	898	50	68	Medium		Pumpkin
+14	Cucumber	17	32	5.8	7.2	525	813	58	81	Medium		Cucumber
+14	Cucumber	17	30	6.2	6.9	513	764	63	83	Medium		Cucumber
+14	Cucumber	18	29	6.1	7.2	529	763	59	82	Medium		Cucumber
+15	Lettuce	15	24	6.2	7.0	379	663	58	77	Medium		Lettuce
+15	Lettuce	16	24	5.9	6.8	405	739	61	72	Medium		Lettuce
+15	Lettuce	15	23	5.9	7.0	411	685	59	77	Medium		Lettuce
+16	Pea plant	11	20	6.1	7.4	400	679	52	71	Medium		Pea plant
+16	Pea plant	10	19	5.8	7.5	392	703	47	70	Medium		Pea plant
+16	Pea plant	9	20	5.9	7.6	390	697	49	67	Medium		Pea plant
+17	Corn	19	32	5.9	7.1	510	995	50	73	Medium		Corn
+17	Corn	19	31	5.7	7.2	520	1024	53	72	Medium		Corn
+17	Corn	17	34	5.7	7.2	476	1035	49	78	Medium		Corn
+19	Sweet potato	21	29	5.7	6.6	737	1267	59	79	Medium		Sweet potato
+19	Sweet potato	20	31	5.5	6.4	720	1242	61	77	Medium		Sweet potato
+19	Sweet potato	20	28	5.5	6.4	724	1288	61	80	Medium		Sweet potato
+20	Guava	23	29	5.0	7.2	1023	2006	57	80	Medium		Guava
+20	Guava	24	27	5.0	7.0	971	2008	61	81	Medium		Guava
+20	Guava	24	30	5.1	7.2	998	1986	61	80	Medium		Guava
+21	Papaya	22	33	6.1	6.8	1506	2468	64	82	High		Papaya
+21	Papaya	22	32	6.1	6.9	1519	2476	67	86	High		Papaya
+21	Papaya	22	34	6.0	6.9	1475	2501	63	82	High		Papaya
+22	Banana	26	34	5.5	7.1	1487	2524	68	88	High		Banana
+22	Banana	25	35	5.6	7.2	1513	2463	73	89	High		Banana
+22	Banana	25	37	5.6	6.9	1484	2479	72	91	High		Banana
+23	Cauliflower	15	19	5.9	7.0	482	853	63	80	Medium		Cauliflower
+23	Cauliflower	15	21	5.9	7.0	512	880	59	82	Medium		Cauliflower
+23	Cauliflower	15	19	5.8	7.1	521	855	57	79	Medium		Cauliflower
+24	Strawberry	16	27	5.7	6.6	626	935	61	75	Medium		Strawberry
+24	Strawberry	16	25	5.6	6.3	621	930	63	78	Medium		Strawberry
+24	Strawberry	14	26	5.5	6.7	584	932	60	76	Medium		Strawberry
+25	Carrot	15	23	5.9	6.6	433	768	53	74	Medium		Carrot
+25	Carrot	16	20	6.1	6.9	461	739	58	72	Medium		Carrot
+25	Carrot	14	22	6.1	6.9	464	768	54	72	Medium		Carrot
+28	Orange	14	35	6.0	7.4	872	1490	47	67	Medium		Orange
+28	Orange	13	35	5.8	7.4	871	1532	50	69	Medium		Orange
+28	Orange	13	37	5.9	7.4	900	1508	52	68	Medium		Orange
+29	Apple	11	23	5.9	7.0	812	1236	52	67	Medium		Apple
+29	Apple	10	26	5.8	6.9	776	1182	48	68	Medium		Apple
+29	Apple	11	23	6.1	6.9	830	1236	51	70	Medium		Apple
+30	Pineapple	19	31	4.6	5.7	996	1518	70	85	Low		Pineapple
+30	Pineapple	19	33	4.5	5.4	980	1479	67	85	Low		Pineapple
+30	Pineapple	19	33	4.4	5.7	997	1473	71	87	Low		Pineapple
+31	Watermelon	20	37	6.0	7.1	407	576	53	69	Medium		Watermelon
+31	Watermelon	21	34	5.8	6.9	377	626	52	67	Medium		Watermelon
+31	Watermelon	20	36	6.1	7.1	375	608	49	69	Medium		Watermelon
+32	Dragon fruit	20	32	5.7	7.1	614	1287	61	83	Low		Dragon fruit
+32	Dragon fruit	21	30	5.6	6.9	585	1333	63	79	Low		Dragon fruit
+32	Dragon fruit	20	31	5.3	6.9	593	1298	61	78	Low		Dragon fruit
+33	Rambutan	23	31	5.2	6.6	1977	2984	78	88	High		Rambutan
+33	Rambutan	23	31	5.0	6.5	1988	3021	77	89	High		Rambutan
+33	Rambutan	21	32	4.9	6.4	2017	2982	76	92	High		Rambutan
+34	Lychee	16	29	5.7	6.6	1183	1779	66	84	High		Lychee
+34	Lychee	16	32	5.5	6.6	1219	1772	65	87	High		Lychee
+34	Lychee	14	31	5.6	6.7	1177	1774	62	85	High		Lychee
+35	Cherry	16	25	6.1	7.6	615	1014	52	68	Medium		Cherry
+35	Cherry	15	24	6.2	7.5	588	998	52	68	Medium		Cherry
+35	Cherry	14	23	5.8	7.5	600	975	51	67	Medium		Cherry
+36	Pear	13	24	5.9	7.1	673	1036	58	72	Medium		Pear
+36	Pear	13	27	6.1	7.0	711	986	56	72	Medium		Pear
+36	Pear	12	26	5.9	7.0	729	992	54	69	Medium		Pear
+37	Black pepper	20	33	5.5	6.7	1997	2975	72	89	High		Black pepper
+37	Black pepper	21	34	5.5	6.4	2021	2975	77	92	High		Black pepper
+37	Black pepper	20	33	5.4	6.5	1980	3008	74	92	High		Black pepper
+38	Bell Pepper	19	27	5.9	6.7	594	968	59	76	Medium		Bell Pepper
+38	Bell Pepper	17	25	6.2	6.9	600	996	62	78	Medium		Bell Pepper
+38	Bell Pepper	19	26	6.2	7.0	604	987	62	77	Medium		Bell Pepper
+39	Culantro	21	31	6.1	6.9	1027	1838	68	86	High		Culantro
+39	Culantro	20	31	6.1	7.1	1022	1832	71	84	High		Culantro
+39	Culantro	21	31	5.9	6.8	972	1798	72	82	High		Culantro
+40	Celery	16	20	6.0	7.2	585	976	65	77	High		Celery
+40	Celery	16	22	5.9	7.0	575	986	66	82	High		Celery
+40	Celery	15	20	5.8	7.0	577	973	63	78	High		Celery
+41	Bottle gourd	20	32	6.0	6.8	505	866	63	78	Medium		Bottle gourd
+41	Bottle gourd	19	31	6.0	7.1	475	861	62	75	Medium		Bottle gourd
+41	Bottle gourd	20	32	5.9	7.2	503	923	57	76	Medium		Bottle gourd
+42	Spinach	11	19	6.5	7.7	373	733	60	79	Medium		Spinach
+42	Spinach	11	20	6.5	7.5	382	723	59	80	Medium		Spinach
+42	Spinach	12	21	6.4	7.3	382	688	61	78	Medium		Spinach
+43	Tealeaf	17	26	4.6	5.6	1473	2526	68	87	High		Tealeaf
+43	Tealeaf	19	25	4.4	5.3	1492	2530	70	82	High		Tealeaf
+43	Tealeaf	19	26	4.6	5.3	1491	2500	68	84	High		Tealeaf
+44	Broccoli	12	20	5.9	7.1	501	812	63	78	Medium		Broccoli
+44	Broccoli	13	22	6.0	7.1	504	845	61	82	Medium		Broccoli
+44	Broccoli	13	22	5.8	7.0	514	845	63	79	Medium		Broccoli
+47	Pomelo	24	34	5.3	6.5	1189	1783	62	84	Medium		Pomelo
+47	Pomelo	24	34	5.7	6.6	1230	1774	63	87	Medium		Pomelo
+47	Pomelo	23	34	5.5	6.6	1186	1770	66	86	Medium		Pomelo
+48	Tamarind	19	36	5.3	7.4	494	1487	37	67	Low		Tamarind
+48	Tamarind	20	37	5.7	7.4	515	1524	43	70	Low		Tamarind
+48	Tamarind	19	34	5.7	7.4	525	1506	43	73	Low		Tamarind
+51	Avocado	17	27	6.0	7.2	979	1584	57	80	Medium		Avocado
+51	Avocado	16	28	6.1	6.9	971	1605	63	83	Medium		Avocado
+51	Avocado	16	27	6.0	7.1	981	1614	60	83	Medium		Avocado
+53	Durian	25	32	5.4	6.4	1518	3000	78	92	High		Durian
+53	Durian	23	34	5.3	6.5	1509	3029	74	88	High		Durian
+53	Durian	24	32	5.4	6.4	1497	3025	75	88	High		Durian
+61	lemon	14	29	5.3	6.4	915	1497	52	76	Medium		lemon
+61	lemon	15	29	5.6	6.3	883	1532	48	78	Medium		lemon
+61	lemon	14	29	5.3	6.4	927	1478	53	74	Medium		lemon
+62	Money tree	15	28	5.9	7.1	805	1411	58	77	Medium		Money tree
+62	Money tree	17	29	6.2	6.9	779	1370	59	77	Medium		Money tree
+62	Money tree	16	30	6.0	7.0	821	1384	63	77	Medium		Money tree
+63	Sacred fig	19	35	6.2	7.7	828	1837	50	73	Low		Sacred fig
+63	Sacred fig	17	35	6.0	7.3	802	1838	49	74	Low		Sacred fig
+63	Sacred fig	18	37	6.1	7.5	777	1817	47	78	Low		Sacred fig
+64	Freshwater mangrove	21	35	6.0	7.4	1518	2992	71	89	High		Freshwater mangrove
+64	Freshwater mangrove	23	33	5.9	7.6	1472	2992	67	87	High		Freshwater mangrove
+64	Freshwater mangrove	23	35	6.2	7.3	1491	3033	69	93	High		Freshwater mangrove
+68	Plum tree	14	27	6.1	6.9	705	1177	50	67	Medium		Plum tree
+68	Plum tree	14	30	6.1	7.1	684	1176	51	73	Medium		Plum tree
+68	Plum tree	14	27	5.8	7.0	718	1208	53	67	Medium		Plum tree
+71	cat-tail	15	30	5.8	8.1	982	2035	72	90	High		cat-tail
+71	cat-tail	16	31	6.1	8.1	985	2020	72	87	High		cat-tail
+71	cat-tail	16	29	5.9	8.0	994	2003	71	89	High		cat-tail
+65	Elephant Ear Taro	19	31	5.6	6.6	1494	2495	69	87	High		Elephant Ear Taro
+65	Elephant Ear Taro	21	34	5.4	6.3	1493	2482	70	89	High		Elephant Ear Taro
+65	Elephant Ear Taro	21	34	5.5	6.4	1519	2514	70	87	High		Elephant Ear Taro
+66	Water Bamboo	17	31	5.8	7.3	1174	2161	64	85	High		Water Bamboo
+66	Water Bamboo	17	32	5.9	7.4	1180	2180	62	86	High		Water Bamboo
+66	Water Bamboo	19	33	6.1	7.6	1209	2164	65	86	High		Water Bamboo
+68	Taro	20	32	5.5	6.3	1529	2528	73	88	High		Taro
+68	Taro	19	32	5.5	6.4	1481	2528	73	89	High		Taro
+68	Taro	21	34	5.7	6.4	1493	2522	67	89	High		Taro
+70	Lemon Grass	20	35	5.8	7.4	772	1487	59	82	Medium		Lemon Grass
+70	Lemon Grass	21	33	6.0	7.4	805	1525	62	82	Medium		Lemon Grass
+70	Lemon Grass	19	34	6.0	7.7	829	1468	59	78	Medium		Lemon Grass
+71	Cassod Tree	19	36	5.7	7.7	598	1482	48	77	Low		Cassod Tree
+71	Cassod Tree	20	37	5.7	7.6	587	1519	51	75	Low		Cassod Tree
+71	Cassod Tree	21	35	5.7	7.3	576	1472	48	78	Low		Cassod Tree
+72	Docynia (Wild Apple)	12	26	5.3	6.6	979	1812	61	79	Medium		Docynia (Wild Apple)
+72	Docynia (Wild Apple)	12	23	5.4	6.7	1018	1818	63	80	Medium		Docynia (Wild Apple)
+72	Docynia (Wild Apple)	11	25	5.4	6.7	1022	1803	57	82	Medium		Docynia (Wild Apple)
+73	Jackfruit	20	34	6.0	7.3	1022	2414	64	87	Medium		Jackfruit
+73	Jackfruit	20	34	5.8	7.6	1013	2370	66	86	Medium		Jackfruit
+73	Jackfruit	21	35	6.1	7.6	1015	2438	68	85	Medium		Jackfruit
+74	Indian Gooseberry	16	34	5.9	8.2	605	1389	50	78	Low		Indian Gooseberry
+74	Indian Gooseberry	14	36	5.9	8.1	607	1389	53	74	Low		Indian Gooseberry
+74	Indian Gooseberry	14	35	6.0	7.9	578	1397	51	76	Low		Indian Gooseberry
+75	Mango	24	34	5.6	7.4	747	2497	51	74	Medium		Mango
+75	Mango	25	34	5.6	7.5	745	2478	53	73	Medium		Mango
+75	Mango	23	36	5.7	7.4	769	2471	49	73	Medium		Mango
+76	Coleus	19	31	6.0	7.0	828	1408	62	83	Medium		Coleus
+76	Coleus	18	30	5.9	6.8	811	1380	58	77	Medium		Coleus
+76	Coleus	18	32	6.1	7.0	793	1373	62	83	Medium		Coleus
+77	Watercress	9	19	6.6	7.4	1176	2492	75	94	High		Watercress
+77	Watercress	9	22	6.7	7.6	1204	2478	77	94	High		Watercress
+77	Watercress	9	21	6.6	7.7	1193	2491	77	92	High		Watercress
+78	Rice (Paddy)	23	35	5.5	7.0	1495	2468	65	89	High		Rice (Paddy)
+78	Rice (Paddy)	23	34	5.4	7.0	1491	2485	67	86	High		Rice (Paddy)
+78	Rice (Paddy)	23	36	5.7	6.6	1530	2479	67	86	High		Rice (Paddy)
+79	Sesame	24	37	5.4	7.5	396	622	43	65	Low		Sesame
+79	Sesame	26	35	5.5	7.3	399	613	43	67	Low		Sesame
+79	Sesame	24	36	5.5	7.4	378	650	43	68	Low		Sesame
+80	Groundnut (Peanut)	21	34	6.0	6.9	511	1010	53	72	Medium		Groundnut (Peanut)
+80	Groundnut (Peanut)	23	31	6.1	6.9	481	962	53	71	Medium		Groundnut (Peanut)
+80	Groundnut (Peanut)	22	34	6.1	6.9	499	1011	53	70	Medium		Groundnut (Peanut)
+81	Chickpea	15	30	5.8	7.7	427	693	37	60	Low		Chickpea
+81	Chickpea	14	27	6.2	7.9	406	668	37	62	Low		Chickpea
+81	Chickpea	14	28	5.8	7.6	406	722	41	59	Low		Chickpea
+82	Black Gram	23	36	5.9	7.5	602	1038	58	73	Medium		Black Gram
+82	Black Gram	23	35	6.2	7.6	581	1020	55	73	Medium		Black Gram
+82	Black Gram	23	35	6.0	7.5	570	1031	57	72	Medium		Black Gram
+84	Pigeon Pea	19	34	5.4	7.4	585	992	49	69	Low		Pigeon Pea
+84	Pigeon Pea	18	37	5.6	7.3	617	1027	51	73	Low		Pigeon Pea
+84	Pigeon Pea	18	37	5.5	7.4	577	964	53	70	Low		Pigeon Pea
+85	Sugarcane	21	36	6.1	7.6	1501	2496	71	82	High		Sugarcane
+85	Sugarcane	21	36	6.2	7.6	1511	2470	70	83	High		Sugarcane
+85	Sugarcane	21	35	5.9	7.7	1488	2473	70	86	High		Sugarcane
+86	Cotton	20	31	5.7	8.1	485	970	47	68	Medium		Cotton
+86	Cotton	22	33	5.7	8.0	527	969	51	68	Medium		Cotton
+86	Cotton	22	33	5.8	7.9	471	968	52	70	Medium		Cotton
+87	Coffee	14	28	5.7	6.5	1516	2534	67	88	High		Coffee
+87	Coffee	16	26	5.7	6.6	1522	2504	73	87	High		Coffee
+87	Coffee	14	25	5.6	6.7	1516	2539	73	85	High		Coffee
+88	Betel Leaf	21	31	5.9	7.2	1503	2227	70	93	High		Betel Leaf
+88	Betel Leaf	19	32	6.1	6.9	1514	2167	72	90	High		Betel Leaf
+88	Betel Leaf	21	32	6.0	6.9	1516	2205	67	93	High		Betel Leaf
+89	Betel Nut (Areca Palm)	16	35	5.6	7.5	1506	2995	69	89	High		Betel Nut (Areca Palm)
+89	Betel Nut (Areca Palm)	14	37	5.6	7.5	1513	2975	68	88	High		Betel Nut (Areca Palm)
+89	Betel Nut (Areca Palm)	14	34	5.4	7.5	1479	2969	68	91	High		Betel Nut (Areca Palm)
+90	Okra	21	35	5.8	6.7	593	1003	59	80	Medium		Okra
+90	Okra	23	37	6.0	6.9	601	1006	63	83	Medium		Okra
+90	Okra	23	35	6.1	6.8	593	968	62	78	Medium		Okra
+91	Bitter Gourd	25	31	6.1	7.1	481	869	58	72	Medium		Bitter Gourd
+91	Bitter Gourd	25	31	6.2	7.2	521	894	61	78	Medium		Bitter Gourd
+91	Bitter Gourd	23	31	5.9	7.0	490	898	58	77	Medium		Bitter Gourd
+92	Roselle	20	32	5.5	6.9	777	1416	59	79	Medium		Roselle
+92	Roselle	19	34	5.3	6.9	826	1394	57	77	Medium		Roselle
+92	Roselle	19	31	5.4	7.1	820	1367	61	77	Medium		Roselle
+93	Yardlong Bean	19	31	5.3	6.6	618	1038	63	81	Medium		Yardlong Bean
+93	Yardlong Bean	20	34	5.4	6.6	600	1004	60	82	Medium		Yardlong Bean
+93	Yardlong Bean	21	31	5.7	6.6	620	1028	60	80	Medium		Yardlong Bean
+94	Sunflower	19	31	6.1	7.7	527	832	45	65	Medium		Sunflower
+94	Sunflower	19	29	6.1	7.4	477	798	46	68	Medium		Sunflower
+94	Sunflower	18	29	6.1	7.5	487	816	47	65	Medium		Sunflower
+95	Soybean	20	31	5.8	7.1	572	1030	56	76	Medium		Soybean
+95	Soybean	19	32	5.8	6.9	587	1024	52	77	Medium		Soybean
+95	Soybean	19	29	5.8	6.8	614	999	55	73	Medium		Soybean
+96	Cashew Nut	19	36	5.2	6.6	997	1964	57	77	Low		Cashew Nut
+96	Cashew Nut	20	37	5.1	6.6	1013	2003	61	81	Low		Cashew Nut
+96	Cashew Nut	20	35	4.8	6.7	995	1960	62	79	Low		Cashew Nut
+97	Mangosteen	26	37	5.6	6.4	1805	3011	72	87	High		Mangosteen
+97	Mangosteen	25	34	5.5	6.6	1811	2969	74	93	High		Mangosteen
+97	Mangosteen	26	36	5.6	6.7	1789	3010	75	93	High		Mangosteen
+98	Coconut Palm	21	34	5.2	8.1	1318	2463	72	88	High		Coconut Palm
+98	Coconut Palm	21	34	5.0	8.0	1330	2508	68	92	High		Coconut Palm
+98	Coconut Palm	23	35	5.3	8.2	1300	2510	73	93	High		Coconut Palm
+99	Longan	17	31	5.4	6.5	1178	1835	64	86	High		Longan
+99	Longan	17	32	5.6	6.6	1199	1823	62	83	High		Longan
+99	Longan	18	29	5.6	6.5	1179	1785	66	82	High		Longan
+100	Cassava	19	34	5.7	6.9	1013	2023	58	79	Low		Cassava
+100	Cassava	19	32	5.4	6.9	976	1992	61	82	Low		Cassava
+100	Cassava	21	31	5.4	6.9	989	1964	61	77	Low		Cassava
+101	Mustard Greens	12	23	6.0	7.1	417	728	56	78	Medium		Mustard Greens
+101	Mustard Greens	12	21	5.9	6.8	417	732	53	75	Medium		Mustard Greens
+101	Mustard Greens	11	23	6.1	6.9	376	780	56	76	Medium		Mustard Greens
+102	Ridge Gourd	21	33	6.0	7.2	519	897	62	83	Medium		Ridge Gourd
+102	Ridge Gourd	22	33	6.0	7.0	510	861	62	79	Medium		Ridge Gourd
+102	Ridge Gourd	21	33	5.9	7.0	524	900	58	78	Medium		Ridge Gourd
+103	Morning Glory (Water Spinach)	21	33	5.4	7.1	981	2024	72	91	High		Morning Glory (Water Spinach)
+103	Morning Glory (Water Spinach)	19	35	5.6	6.9	1028	1998	72	88	High		Morning Glory (Water Spinach)
+103	Morning Glory (Water Spinach)	20	32	5.4	6.8	1012	1984	70	92	High		Morning Glory (Water Spinach)
+104	Drumstick (Moringa)	22	36	5.9	7.5	312	999	41	66	Low		Drumstick (Moringa)
+104	Drumstick (Moringa)	20	34	6.2	7.6	293	973	38	68	Low		Drumstick (Moringa)
+104	Drumstick (Moringa)	20	35	6.1	7.6	296	1008	38	62	Low		Drumstick (Moringa)

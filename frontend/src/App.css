@@ -119,6 +119,36 @@ button:disabled { cursor: not-allowed; opacity: .6; }
 .ndvi-map-heading p { margin: .25rem 0 0; color: var(--text-muted); font-size: .82rem; }
 .ndvi-map-heading strong { color: var(--primary); font-size: .9rem; }
 .ndvi-map { z-index: 0; width: 100%; height: 360px; }
+.gv-account-link { display: inline-flex; align-items: center; gap: .35rem; border: 0; background: transparent; color: var(--primary); font-weight: 700; cursor: pointer; }
+.account-page { max-width: 1100px; margin: 0 auto; padding: 1.5rem 0 3rem; }
+.account-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; color: var(--primary); }
+.account-page-heading h1 { margin: .25rem 0; color: var(--text); font-size: clamp(1.6rem, 3vw, 2.35rem); }
+.account-page-heading p:not(.ndvi-controls-kicker) { margin: 0; color: var(--text-muted); }
+.account-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.account-card { display: flex; flex-direction: column; gap: .8rem; }
+.account-profile-setup { max-width: 760px; margin-bottom: 1rem; }
+.account-required-note { margin: -.25rem 0 .4rem; color: var(--text-muted); font-size: .85rem; }
+.account-profile-summary { margin-bottom: 1rem; padding: 1.25rem; }
+.account-profile-summary-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.account-profile-summary-heading h2 { margin: .2rem 0 0; color: var(--text); }
+.account-profile-details { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .9rem; }
+.account-profile-details span { display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px; background: rgba(205,228,181,.3); padding: .5rem .7rem; color: var(--primary); font-size: .8rem; font-weight: 700; }
+.account-profile-notes { margin: .8rem 0 0; color: var(--text-muted); font-size: .85rem; }
+.account-card h2 { display: flex; align-items: center; gap: .45rem; margin: 0 0 .25rem; color: var(--primary); font-size: 1.05rem; }
+.account-card label { display: grid; gap: .3rem; color: var(--text-muted); font-size: .78rem; font-weight: 700; }
+.account-card input, .account-card select, .account-card textarea { width: 100%; border: 1px solid var(--border); border-radius: .7rem; background: #fff; padding: .65rem .75rem; color: var(--text); font: inherit; }
+.account-check { display: flex !important; grid-template-columns: auto 1fr; align-items: center; gap: .5rem; }
+.account-check input { width: auto; }
+.account-message { margin: .75rem 0; border-radius: .7rem; background: #edf8ed; padding: .65rem .8rem; color: #246b2d; font-size: .85rem; }
+.account-list { display: grid; gap: .5rem; }
+.account-list-row, .account-history-row { display: flex; align-items: center; gap: .75rem; border-radius: .7rem; background: rgba(205, 228, 181, .22); padding: .65rem .75rem; }
+.account-list-row strong, .account-history-row strong { flex: 1; }
+.account-list-row button { border: 0; background: transparent; color: var(--danger); cursor: pointer; font-size: 1.1rem; }
+.account-history-row span { color: var(--primary); font-weight: 700; }
+.account-history-row small { color: var(--text-muted); }
+.account-empty { margin: 0; color: var(--text-muted); font-size: .9rem; }
+.account-action-row { display: flex; flex-wrap: wrap; gap: .6rem; margin: .75rem 0; }
+@media (max-width: 760px) { .account-grid { grid-template-columns: 1fr; } .account-page { padding-inline: .5rem; } }
 .ndvi-controls-kicker { color: var(--primary); font-size: .68rem; font-weight: 800; letter-spacing: .12em; }
 .ndvi-control-field { min-width: 0; }
 .ndvi-controls select { max-width: none; min-height: 3rem; padding-right: 2.25rem; font-weight: 600; }
@@ -469,6 +499,14 @@ button:disabled { cursor: not-allowed; opacity: .6; }
 .crop-source-intro strong, .crop-manual-note strong { display: block; color: #20211f; font-size: .92rem; }
 .crop-source-intro p, .crop-manual-note p { margin: .3rem 0 0; color: #686e67; font-size: .8rem; line-height: 1.5; }
 .crop-source-action .detect-btn { min-height: 48px; margin-top: 1.1rem; border-radius: 999px; }
+.crop-location-map-block { margin-top: 1rem; overflow: hidden; border: 1px solid rgba(20,116,47,.16); border-radius: 1rem; background: rgba(255,255,255,.72); }
+.crop-location-map-heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .8rem .9rem; }
+.crop-location-map-heading strong { color: #20211f; font-size: .82rem; }
+.crop-location-map-heading p { margin: .25rem 0 0; color: #686e67; font-size: .72rem; line-height: 1.4; }
+.crop-location-map-heading small { flex: 0 0 auto; color: #14742f; font-size: .68rem; font-weight: 700; }
+.crop-location-map { z-index: 0; width: 100%; height: 230px; }
+.crop-map-region-badge { display: flex; align-items: center; gap: .4rem; margin: .55rem .75rem .7rem; padding: .5rem .65rem; border: 1px solid rgba(20,116,47,.18); border-radius: .65rem; color: #14742f; background: rgba(236,249,237,.9); font-size: .78rem; font-weight: 700; }
+.crop-map-status { margin: 0; padding: .5rem .75rem; color: #14742f; font-size: .72rem; }
 .crop-location-error { margin: .8rem 0 0; color: #b91c1c; font-size: .8rem; line-height: 1.5; }
 .crop-weather-summary { margin-top: 1.2rem; border-top: 1px solid rgba(32,33,31,.12); padding-top: 1.2rem; }
 .crop-weather-summary .weather-grid { margin-bottom: .85rem; }

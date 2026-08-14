@@ -40,7 +40,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
         await register(email, password)
       }
       
-      onSuccess()
+      onSuccess({ newAccount: mode === 'signup' })
     } catch (err) {
       const messageKey = err.status === 409
         ? 'auth.userExists'

@@ -70,6 +70,40 @@ const translations = {
     "nav.ndvi": "NDVI Analysis",
     "nav.suggestion": "Crop Suggestion",
     "nav.chat": "AI Chat",
+    "account.kicker": "FARMER ACCOUNT",
+    "account.title": "My farm workspace",
+    "account.subtitle": "Save your farm context and return to useful analysis faster.",
+    "account.setupProfile": "Set up your farm profile",
+    "account.editProfile": "Edit farm profile",
+    "account.requiredProfile": "Complete farm name, location, area, and soil type to personalize your workspace.",
+    "account.farmLocation": "Region and district",
+    "account.chooseLocation": "Choose a region and district",
+    "account.soilPlaceholder": "Choose or type a soil type",
+    "account.farmProfile": "Farm profile",
+    "account.farmName": "Farm name",
+    "account.regionCode": "Region code",
+    "account.area": "Farm area (acres)",
+    "account.soilType": "Soil type",
+    "account.notes": "Notes",
+    "account.saveProfile": "Save profile",
+    "account.monitoring": "Monitoring preferences",
+    "account.monitorRegion": "Monitoring region",
+    "account.frequency": "Update reminder",
+    "account.enableMonitoring": "Enable monitoring reminders",
+    "account.ndviAlerts": "NDVI alerts",
+    "account.marketAlerts": "Market alerts",
+    "account.savePreferences": "Save preferences",
+    "account.favorites": "Favorite crops",
+    "account.history": "Recommendation history",
+    "account.noFavorites": "Favorite a crop from a recommendation to see it here.",
+    "account.noHistory": "Saved recommendations will appear here.",
+    "account.saved": "Farm profile saved.",
+    "account.preferencesSaved": "Monitoring preferences saved.",
+    "account.analysisSaved": "Analysis saved to your account.",
+    "account.cropSaved": "Crop added to favorites.",
+    "account.saveAnalysis": "Save analysis",
+    "account.favorite": "Favorite crop",
+    "account.signInToSave": "Sign in to save",
 
     // NDVI Analysis
     "ndvi.title": "NDVI Satellite Analysis",
@@ -103,6 +137,8 @@ const translations = {
     "crop.chooseSource": "Choose your data source",
     "crop.currentLocation": "Use current field location",
     "crop.retrieveWeather": "Retrieve regional weather conditions from your coordinates.",
+    "crop.chooseOnMap": "Choose a location on the map",
+    "crop.mapHint": "Click a point to load matching weather and soil conditions.",
     "crop.ownMeasurements": "Use your own measurements",
     "crop.enterReadings": "Enter recent soil and weather readings in the next step.",
     "crop.growingConditions": "Growing conditions",
@@ -124,6 +160,7 @@ const translations = {
     "crop.soilPh": "Soil pH Level",
     "crop.rainfall": "Rainfall (7-day, mm)",
     "crop.temp": "Average Temperature (°C)",
+    "crop.farmArea": "Farm area (acres)",
     "crop.analyzing": "Analyzing...",
     "crop.suggestBtn": "Get Suggestion",
     "crop.recommended": "Recommended Crop",
@@ -306,6 +343,7 @@ const myOverrides = {
 }
 
 Object.assign(myOverrides, {
+  "crop.farmArea": "လယ်ယာဧရိယာ (ဧက)",
   "nav.home": "ပင်မစာမျက်နှာ",
   "nav.fieldHealth": "စိုက်ခင်းကျန်းမာရေး",
   "nav.cropPlanner": "သီးနှံစိုက်ပျိုးမှု စီမံကိန်း",
@@ -360,6 +398,17 @@ Object.assign(myOverrides, {
   ,"auth.haveAccount": "အကောင့်ရှိပြီးသားလား?"
   ,"auth.switchSignup": "အကောင့်ဖွင့်ရန်"
   ,"auth.switchSignin": "အကောင့်ဝင်ရန်"
+});
+
+Object.assign(myOverrides, {
+  "account.setupProfile": "သင့်လယ်ယာပရိုဖိုင်ကို စတင်သတ်မှတ်ပါ",
+  "account.editProfile": "လယ်ယာပရိုဖိုင် ပြင်ဆင်ရန်",
+  "account.requiredProfile": "သင့်လုပ်ငန်းခွင်ကို စိတ်ကြိုက်ပြင်ဆင်ရန် လယ်ယာအမည်၊ တည်နေရာ၊ ဧရိယာနှင့် မြေအမျိုးအစားကို ဖြည့်ပါ။",
+  "account.farmLocation": "ပြည်နယ်/တိုင်းနှင့် ခရိုင်",
+  "account.chooseLocation": "ပြည်နယ်/တိုင်းနှင့် ခရိုင်ကို ရွေးချယ်ပါ",
+  "account.soilPlaceholder": "မြေအမျိုးအစားကို ရွေးချယ်ပါ သို့မဟုတ် ရိုက်ထည့်ပါ",
+  "crop.chooseOnMap": "မြေပုံပေါ်တွင် တည်နေရာရွေးချယ်ရန်",
+  "crop.mapHint": "ရာသီဥတုနှင့် မြေဆီလွှာအခြေအနေကို ရယူရန် မြေပုံပေါ်ရှိနေရာကို နှိပ်ပါ။",
 });
 
 export function LanguageProvider({ children }) {

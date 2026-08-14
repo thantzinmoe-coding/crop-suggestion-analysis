@@ -27,6 +27,11 @@ async def ensure_indexes() -> None:
         [("region_pcode", 1), ("observation_date", 1)], unique=True
     )
     await database.users.create_index("email", unique=True)
+    await database.sessions.create_index("token", unique=True)
+    await database.farm_profiles.create_index("user_id", unique=True)
+    await database.monitoring_preferences.create_index("user_id", unique=True)
+    await database.favorite_crops.create_index([("user_id", 1), ("crop_key", 1)], unique=True)
+    await database.recommendation_history.create_index([("user_id", 1), ("created_at", -1)])
 
 
 async def close_database() -> None:

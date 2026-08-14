@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-PROJECT_DATA_DIR = Path(__file__).resolve().parents[3] / "datasets"
-BOUNDARY_PATH = PROJECT_DATA_DIR / "geoserver-GetFeature.application"
+PROJECT_DATA_DIR = DATA_DIR
+BOUNDARY_PATH = DATA_DIR / "geoserver-GetFeature.application"
 
 # Approximate administrative-region centers for map navigation. These points
 # select an analysis region; they are not parcel-level boundary coordinates.
@@ -84,7 +84,7 @@ def get_ndvi_data() -> pd.DataFrame:
 @lru_cache(maxsize=1)
 def load_region_names() -> dict[str, dict[str, str]]:
     """Load authoritative Myanmar PCODE names from the added boundary workbook."""
-    path = PROJECT_DATA_DIR / "mmr_admin_boundaries.xlsx"
+    path = DATA_DIR / "mmr_admin_boundaries.xlsx"
     try:
         states = pd.read_excel(
             path,

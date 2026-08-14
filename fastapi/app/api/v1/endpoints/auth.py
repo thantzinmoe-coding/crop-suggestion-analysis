@@ -3,6 +3,7 @@ import hmac
 import logging
 import secrets
 import smtplib
+from datetime import datetime, timezone
 from email.message import EmailMessage
 from typing import Any
 
@@ -68,9 +69,14 @@ def _send_welcome_email(recipient: str) -> bool:
     return True
 
 
-def _response(user: dict[str, Any], email_sent: bool = False) -> AuthResponse:
+async def _response(user: dict[str, Any], db: Any, email_sent: bool = False) -> AuthResponse:
     token = secrets.token_urlsafe(32)
     user_id = str(user["_id"])
+    await db.sessions.insert_one({
+        "token": token,
+        "user_id": user_id,
+        "created_at": datetime.now(timezone.utc),
+    })
     return AuthResponse(token=token, user={"id": user_id, "email": user["email"]}, email_sent=email_sent)
 
 
@@ -90,7 +96,7 @@ async def register(credentials: Credentials, db: Any = Depends(get_database)) ->
         # Do not discard a valid account if the optional mail provider is unavailable.
         logger.warning("Welcome email failed for %s: %s", email, exc)
         email_sent = False
-    return _response(user, email_sent)
+    return await _response(user, db, email_sent)
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -99,4 +105,4 @@ async def login(credentials: LoginCredentials, db: Any = Depends(get_database)) 
     user = await db.users.find_one({"email": email})
     if not user or not _check_password(credentials.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
-    return _response(user)
+    return await _response(user, db)

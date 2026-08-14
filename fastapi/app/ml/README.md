@@ -1,7 +1,9 @@
 # Crop suggestion model
 
 - `artifacts/` contains the model and label encoder loaded by the API.
-- `data/plants.csv` contains the 92-plant recommendation dataset.
+- `data/price_dataset_merged.csv` contains the canonical merged price records used by the recommender.
+- `data/crop_dataset (1)_aligned.xls` contains the crop suitability criteria.
+- `data/crop_dataset_mm.xls` contains Burmese crop names.
 - `crop_predictor.py` contains inference-only application code.
 - `plant_recommender.py` provides dataset-based top-three recommendations.
 - `training/` contains offline dataset generation and training utilities.

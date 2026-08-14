@@ -1,4 +1,4 @@
-import { Bot, Home, Languages, LogOut, Menu, Radar, Sprout, X } from 'lucide-react'
+import { Bot, Home, Languages, LogIn, LogOut, Menu, Radar, Sprout, UserRound, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -15,7 +15,7 @@ const navItems = [
 function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { language, setLanguage, t } = useLanguage()
-  const { logout } = useAuth()
+  const { currentUser, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -65,10 +65,14 @@ function AppHeader() {
             <button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button>
             <button type="button" className={language === 'my' ? 'active' : ''} onClick={() => setLanguage('my')}>MY</button>
           </div>
-          <button className="gv-signout" type="button" onClick={handleLogout}>
-            <LogOut size={17} aria-hidden="true" />
-            <span>{t('auth.logout') || 'Sign out'}</span>
-          </button>
+          {currentUser ? (
+            <>
+              <button className="gv-account-link" type="button" onClick={() => navigate('/account')}><UserRound size={17} aria-hidden="true" /><span>{t('account.title') || 'My account'}</span></button>
+              <button className="gv-signout" type="button" onClick={handleLogout}><LogOut size={17} aria-hidden="true" /><span>{t('auth.logout') || 'Sign out'}</span></button>
+            </>
+          ) : (
+            <button className="gv-signout" type="button" onClick={() => navigate('/?auth=signin')}><LogIn size={17} aria-hidden="true" /><span>{t('auth.loginBtn') || 'Sign in'}</span></button>
+          )}
           <button
             className="gv-menu-button"
             type="button"

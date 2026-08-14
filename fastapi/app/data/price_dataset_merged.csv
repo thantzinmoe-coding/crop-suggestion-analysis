@@ -1,0 +1,90 @@
+plant_id,plant_name,Current_Market_Price_MMK_per_kg,Price_Unit
+1,Mint,4287.0,MMK/kg
+2,Basil,3674.0,MMK/kg
+3,Coriander,6124.0,MMK/kg
+4,Tomato,2756.0,MMK/kg
+5,Chilli,11023.0,MMK/kg
+6,Eggplant,2143.0,MMK/kg
+7,Cabbage,1837.0,MMK/kg
+8,Onion,3368.0,MMK/kg
+9,Garlic,11023.0,MMK/kg
+10,Potato,2940.0,MMK/kg
+11,Ginger,5205.0,MMK/kg
+12,Turmeric,6124.0,MMK/kg
+13,Pumpkin,1531.0,MMK/kg
+14,Cucumber,1715.0,MMK/kg
+15,Lettuce,3674.0,MMK/kg
+16,Pea plant,5000.0,MMK/kg
+17,Corn,1837.0,MMK/kg
+19,Sweet potato,2143.0,MMK/kg
+20,Guava,2450.0,MMK/kg
+21,Papaya,1837.0,MMK/kg
+22,Banana,3500.0,MMK/kg
+23,Cauliflower,3062.0,MMK/kg
+24,Strawberry,15310.0,MMK/kg
+25,Carrot,3674.0,MMK/kg
+28,Orange,5512.0,MMK/kg
+29,Apple,14000.0,MMK/kg
+30,Pineapple,3500.0,MMK/kg
+31,Watermelon,2000.0,MMK/kg
+32,Dragon fruit,4899.0,MMK/kg
+33,Rambutan,7349.0,MMK/kg
+34,Lychee,9186.0,MMK/kg
+35,Cherry,60000.0,MMK/kg
+36,Pear,12000.0,MMK/kg
+37,Black pepper,24496.0,MMK/kg
+38,Bell Pepper,6124.0,MMK/kg
+39,Culantro,4899.0,MMK/kg
+40,Celery,4593.0,MMK/kg
+41,Bottle gourd,1531.0,MMK/kg
+42,Spinach,2143.0,MMK/kg
+43,Tealeaf,9798.0,MMK/kg
+44,Broccoli,5205.0,MMK/kg
+47,Pomelo,3500.0,MMK/kg
+48,Tamarind,3981.0,MMK/kg
+51,Avocado,5205.0,MMK/kg
+53,Durian,21434.0,MMK/kg
+61,lemon,5000.0,MMK/kg
+62,Money tree,12000.0,MMK/kg
+63,Sacred fig,10000.0,MMK/kg
+64,Freshwater mangrove,5000.0,MMK/kg
+65,Elephant Ear Taro,2000.0,MMK/kg
+66,Water Bamboo,2500.0,MMK/kg
+67,Singapore Almond,4000.0,MMK/kg
+68,Taro,3000.0,MMK/kg
+69,Aloe Vera,2200.0,MMK/kg
+70,Lemon Grass,2500.0,MMK/kg
+71,Cassod Tree,3500.0,MMK/kg
+72,Docynia (Wild Apple),4500.0,MMK/kg
+73,Jackfruit,1800.0,MMK/kg
+74,Indian Gooseberry,3500.0,MMK/kg
+75,Mango,3800.0,MMK/kg
+76,Coleus,3200.0,MMK/kg
+77,Watercress,2800.0,MMK/kg
+78,Rice (Paddy),3200.0,MMK/kg
+79,Sesame,8500.0,MMK/kg
+80,Groundnut,8000.0,MMK/kg
+81,Chickpea,6500.0,MMK/kg
+82,Black Gram,5500.0,MMK/kg
+83,Green Gram,5000.0,MMK/kg
+84,Pigeon Pea,5200.0,MMK/kg
+85,Sugarcane,500.0,MMK/kg
+86,Cotton,5500.0,MMK/kg
+87,Coffee,18000.0,MMK/kg
+88,Betel Leaf,12000.0,MMK/kg
+89,Betel Nut,14000.0,MMK/kg
+90,Okra,2200.0,MMK/kg
+91,Bitter Gourd,3000.0,MMK/kg
+92,Roselle,2500.0,MMK/kg
+93,Yardlong Bean,2600.0,MMK/kg
+94,Sunflower,5800.0,MMK/kg
+95,Soybean,4500.0,MMK/kg
+96,Cashew Nut,32000.0,MMK/kg
+97,Mangosteen,10000.0,MMK/kg
+98,Coconut Palm,2000.0,MMK/kg
+99,Longan,8000.0,MMK/kg
+100,Cassava,1500.0,MMK/kg
+101,Mustard Greens,2200.0,MMK/kg
+102,Ridge Gourd,2800.0,MMK/kg
+103,Morning Glory,1800.0,MMK/kg
+104,Drumstick,4000.0,MMK/kg

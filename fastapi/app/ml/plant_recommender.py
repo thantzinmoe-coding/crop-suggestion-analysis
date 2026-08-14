@@ -1,13 +1,18 @@
 from functools import lru_cache
-from math import exp
 from pathlib import Path
+import re
 
 import pandas as pd
 
-from app.services.market_prices import latest_market_price
-
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "plants.csv"
-MYANMAR_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "plants_mm.csv"
+PRICE_MERGED_PATH = Path(__file__).resolve().parents[1] / "data" / "price_dataset_merged.csv"
+CRITERIA_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "crop_dataset (1)_aligned.xls"
+MYANMAR_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "crop_dataset_mm.xls"
+NAME_ALIASES = {
+    "corn (maize)": "corn",
+    "tea leaf": "tealeaf",
+    "betel nut (areca palm)": "betel nut",
+    "morning glory (water spinach)": "morning glory",
+}
 TOWNSHIP_DATA_PATH = (
     Path(__file__).resolve().parents[1] / "data" / "township_agricultural_data.csv"
 )
@@ -24,20 +29,48 @@ class PlantDatasetUnavailableError(RuntimeError):
     """Raised when the plants dataset cannot be read."""
 
 
+def _name_key(value: object) -> str:
+    key = re.sub(r"\s+", " ", str(value).strip().casefold())
+    return NAME_ALIASES.get(key, key)
+
+
 @lru_cache(maxsize=1)
 def _load_plants() -> pd.DataFrame:
-    if not DATA_PATH.is_file():
-        raise PlantDatasetUnavailableError(f"Plant dataset is missing: {DATA_PATH}")
+    if not PRICE_MERGED_PATH.is_file():
+        raise PlantDatasetUnavailableError(f"Merged price dataset is missing: {PRICE_MERGED_PATH}")
+    if not CRITERIA_DATA_PATH.is_file():
+        raise PlantDatasetUnavailableError(f"Criteria dataset is missing: {CRITERIA_DATA_PATH}")
     try:
-        plants = pd.read_csv(DATA_PATH)
-        plants["lowest_temp"] = pd.to_numeric(plants["lowest_temp"], errors="coerce")
-        plants["highest_temp"] = pd.to_numeric(plants["highest_temp"], errors="coerce")
-        plants["min_area_square_feet"] = pd.to_numeric(
-            plants["min_area_square_feet"], errors="coerce"
-        ).fillna(1)
-        return plants.dropna(subset=["plant_name", "lowest_temp", "highest_temp"])
+        prices = pd.read_csv(PRICE_MERGED_PATH)
+        criteria = pd.read_csv(CRITERIA_DATA_PATH, sep="\t")
+        price_required = ["plant_name", "plant_id", "Current_Market_Price_MMK_per_kg"]
+        criteria_required = ["plant_name", "lowest_temp", "highest_temp", "soil_ph_min", "soil_ph_max", "rainfall_min", "rainfall_max", "humidity_min", "humidity_max", "water_need"]
+        missing = [column for column in price_required if column not in prices.columns]
+        missing += [column for column in criteria_required if column not in criteria.columns]
+        if missing:
+            raise ValueError(f"Missing crop dataset columns: {', '.join(missing)}")
+        price_columns = ["min_height(ft)", "max_height(ft)", "min_area_square_feet", "lifetime(year)", "Current_Market_Price_MMK_per_kg"]
+        for column in price_columns:
+            if column in prices.columns:
+                prices[column] = pd.to_numeric(prices[column].astype(str).str.replace(",", "", regex=False).str.replace('"', "", regex=False), errors="coerce")
+        criteria_numeric = [column for column in criteria_required if column not in {"plant_name", "water_need"}]
+        for column in criteria_numeric:
+            criteria[column] = pd.to_numeric(criteria[column], errors="coerce")
+        prices["plant_id"] = pd.to_numeric(prices["plant_id"], errors="coerce")
+        prices["plant_name"] = prices["plant_name"].astype(str).str.strip()
+        criteria["plant_name"] = criteria["plant_name"].astype(str).str.strip()
+        prices["crop_key"] = prices["plant_name"].map(_name_key)
+        criteria["crop_key"] = criteria["plant_name"].map(_name_key)
+        prices = prices[prices["plant_name"].ne("") & prices["Current_Market_Price_MMK_per_kg"].notna()]
+        criteria = criteria[criteria["plant_name"].ne("")].dropna(subset=criteria_numeric)
+        prices = prices.groupby(["crop_key", "plant_id", "plant_name"], as_index=False).agg({column: "median" for column in price_columns if column in prices.columns})
+        criteria = criteria.groupby("crop_key", as_index=False).agg({**{column: "median" for column in criteria_numeric}, "water_need": "first"})
+        plants = prices.merge(criteria, on="crop_key", how="inner")
+        if plants.empty:
+            raise ValueError("The price and criteria datasets have no matching crop names")
+        return plants
     except Exception as exc:
-        raise PlantDatasetUnavailableError("The plants dataset is invalid.") from exc
+        raise PlantDatasetUnavailableError(f"The crop datasets are invalid: {PRICE_MERGED_PATH} and {CRITERIA_DATA_PATH}") from exc
 
 
 def recommend_plants(
@@ -45,51 +78,23 @@ def recommend_plants(
     rainfall_mm: float,
     temperature_c: float,
     field_area_acres: float = 1,
+    humidity_pct: float | None = None,
     limit: int = 3,
     language: str = "en",
     crop_only: bool = False,
 ) -> list[dict[str, object]]:
     plants = _load_plants().copy()
-    if crop_only:
-        agricultural_uses = (
-            "culinary|food|fruit|salad|spice|medicinal|juice|dessert|"
-            "pickle|edible|cooking"
-        )
-        plants = plants[
-            plants["plant_group"]
-            .astype(str)
-            .str.casefold()
-            .isin({"vegetable", "fruit"})
-            & plants["Uses"]
-            .astype(str)
-            .str.contains(agricultural_uses, case=False, regex=True)
-            & ~plants["plant_name"]
-            .astype(str)
-            .str.contains("tree|wood", case=False, regex=True)
-        ].copy()
-    midpoint = (plants["lowest_temp"] + plants["highest_temp"]) / 2
-    half_range = ((plants["highest_temp"] - plants["lowest_temp"]) / 2).clip(lower=1)
-    temperature_difference = (midpoint - temperature_c).abs()
-    temperature_score = 100 - (temperature_difference / half_range * 50)
-    outside_range = temperature_difference > half_range
-    temperature_score.loc[outside_range] = (
-        50 - ((temperature_difference.loc[outside_range] - half_range.loc[outside_range]) * 15)
-    )
-    ph_penalty = abs(6.5 - soil_ph) * 8
-    water_need = pd.to_numeric(
-        plants["water_necessity (1Lcup/day)"], errors="coerce"
-    ).fillna(1)
-    water_penalty = ((water_need > 2) & (rainfall_mm < 20)).astype(int) * 10
-    plants["match_score"] = (
-        temperature_score - ph_penalty - water_penalty
-    ).clip(15, 98)
+    def range_score(value: float, low: pd.Series, high: pd.Series) -> pd.Series:
+        midpoint = (low + high) / 2
+        span = (high - low).clip(lower=0.01)
+        return (100 - ((float(value) - midpoint).abs() / span * 100)).clip(10, 100)
 
-    viable = plants[
-        (temperature_c >= plants["lowest_temp"] - 2)
-        & (temperature_c <= plants["highest_temp"] + 2)
-    ]
-    if viable.empty:
-        viable = plants
+    temperature_score = range_score(temperature_c, plants["lowest_temp"], plants["highest_temp"])
+    ph_score = range_score(soil_ph, plants["soil_ph_min"], plants["soil_ph_max"])
+    rainfall_score = range_score(rainfall_mm, plants["rainfall_min"], plants["rainfall_max"])
+    humidity_score = range_score(humidity_pct, plants["humidity_min"], plants["humidity_max"]) if humidity_pct is not None else pd.Series(75.0, index=plants.index)
+    plants["match_score"] = (temperature_score * 0.30 + ph_score * 0.25 + rainfall_score * 0.25 + humidity_score * 0.10 + 75 * 0.10).clip(10, 98)
+    viable = plants
 
     ranked = (
         viable.sort_values("match_score", ascending=False)
@@ -102,8 +107,8 @@ def recommend_plants(
             myanmar = pd.read_csv(MYANMAR_DATA_PATH)
             localized = {
                 row["plant_id"]: (
-                    str(row["plant_name"]).strip(),
-                    str(row.get("description", "")).strip(),
+                    str(row["burmese_name_mm"]).strip(),
+                    "",
                 )
                 for _, row in myanmar.drop_duplicates("plant_id").iterrows()
             }
@@ -112,12 +117,13 @@ def recommend_plants(
 
     results: list[dict[str, object]] = []
     for _, plant in best.iterrows():
-        minimum_area = max(float(plant["min_area_square_feet"]), 1)
+        raw_area = plant.get("min_area_square_feet", 1)
+        minimum_area = 1 if pd.isna(raw_area) else max(float(raw_area), 1)
         localized_name, localized_description = localized.get(
             plant.get("plant_id"),
             (
                 str(plant["plant_name"]).strip(),
-                str(plant.get("description", "")).strip(),
+                "",
             ),
         )
         results.append(
@@ -126,18 +132,12 @@ def recommend_plants(
                 "name_en": str(plant["plant_name"]).strip(),
                 "match_score": round(float(plant["match_score"]), 1),
                 "estimated_capacity": int(field_area_acres * 43_560 * 0.8 / minimum_area),
-                "description": localized_description,
+                "description": localized_description if localized_description and localized_description.casefold() != "nan" else "",
                 "market_price_mmk_per_kg": str(
                     plant.get("Current_Market_Price_MMK_per_kg", "")
                 ).strip(),
-                "water_need_liters_per_day": float(
-                    pd.to_numeric(
-                        plant.get("water_necessity (1Lcup/day)"), errors="coerce"
-                    )
-                    if pd.notna(plant.get("water_necessity (1Lcup/day)"))
-                    else 0
-                ),
-                "sunlight": str(plant.get("sunlight", "")).strip(),
+                "water_need": str(plant.get("water_need", "")).strip(),
+                "sunlight": "",
                 "growth_period_years": (
                     f"{plant.get('shortest_growth_period(year)', '')}–"
                     f"{plant.get('longest_growth_period(year)', '')}"
@@ -151,26 +151,38 @@ def recommend_crops(
     soil_ph: float,
     rainfall_mm: float,
     temperature_c: float,
+    field_area_acres: float = 1,
     admin1: str | None = None,
     admin2: str | None = None,
+    humidity_pct: float | None = None,
     language: str = "en",
     limit: int = 3,
 ) -> list[dict[str, object]]:
-    try:
-        history = pd.read_csv(TOWNSHIP_DATA_PATH)
-    except (OSError, ValueError) as exc:
-        raise PlantDatasetUnavailableError(
-            f"Township agriculture dataset is unavailable: {TOWNSHIP_DATA_PATH}"
-        ) from exc
-
     recommendations = recommend_plants(
         soil_ph,
         rainfall_mm,
         temperature_c,
+        field_area_acres=field_area_acres,
+        humidity_pct=humidity_pct,
         limit=10,
         language=language,
         crop_only=True,
     )
+    for recommendation in recommendations:
+        recommendation.update({
+            "market_price_mmk_per_kg": float(recommendation.get("market_price_mmk_per_kg", 0) or 0),
+            "market_price_source": "price_dataset_merged.csv",
+            "market_price_observed_date": None,
+            "market_name": None,
+            "market_price_is_dynamic": False,
+        })
+    return sorted(
+        [item for item in recommendations if float(item["market_price_mmk_per_kg"]) > 0],
+        key=lambda item: float(item["match_score"]), reverse=True,
+    )[:limit]
+
+    # Legacy township-history fallback retained below for reference; the
+    # current flow intentionally uses only the two joined crop datasets.
     history["crop_key"] = history["best_crop"].astype(str).str.casefold()
 
     for recommendation in recommendations:

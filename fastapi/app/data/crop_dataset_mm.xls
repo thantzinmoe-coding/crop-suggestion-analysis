@@ -1,0 +1,89 @@
+plant_id,plant_name_en,burmese_name_mm,burmese_name_en
+1,Mint,ပူစီနံ,Pu-si-nan
+2,Basil,ပင်စိမ်း,Pin-sein
+3,Coriander,နံနံပင်,Nan-nan-bin
+4,Tomato,ခရမ်းချဉ်သီး,Kha-yan-chin-thei
+5,Chilli,ငရုတ်သီး,Nga-yok-thei
+6,Eggplant,ခရမ်းသီး,Kha-yan-thei
+7,Cabbage,မုံလာထုပ်,Mon-la-htop
+8,Onion,ကြက်သွန်နီ,Kyet-thun-ni
+9,Garlic,ကြက်သွန်ဖြူ,Kyet-thun-pyu
+10,Potato,အာလူး,Ah-loo
+11,Ginger,ဂျင်း,Gyin
+12,Turmeric,နနွင်း,Na-nwin
+13,Pumpkin,ရွှေဖရုံသီး,Shwe-pha-yon-thei
+14,Cucumber,သခွားသီး,Tha-khwa-thei
+15,Lettuce,ဆလတ်ရွက်,Sa-lat-ywet
+16,Pea plant,ပဲပင် / ပဲသီး,Pe-bin / Pe-thei
+17,Corn,ပြောင်းဖူး,Pyaung-boo
+19,Sweet potato,ကဆွန်းဥ,Ka-swun-u
+20,Guava,မာလကာသီး,Mar-la-kar-thei
+21,Papaya,သင်္ဘောသီး,Thin-baw-thei
+22,Banana,ငှက်ပျောသီး,Hgnet-pyaw-thei
+23,Cauliflower,မုံလာပွင့်,Mon-la-pwin
+24,Strawberry,စထရော်ဘယ်ရီ,Strawberry
+25,Carrot,မုံလာဥနီ,Mon-la-u-ni
+28,Orange,လိမ္မော်သီး,Leim-maw-thei
+29,Apple,ပန်းသီး,Pan-thei
+30,Pineapple,နာနတ်သီး,Nar-nat-thei
+31,Watermelon,ဖရဲသီး,Pha-ye-thei
+32,Dragon fruit,နဂါးမောက်သီး,Na-gar-mauk-thei
+33,Rambutan,ကြက်မောက်သီး,Kyat-mauk-thei
+34,Lychee,လင်ချီးသီး,Litchi-thei
+35,Cherry,ချယ်ရီသီး,Cherry-thei
+36,Pear,သစ်တောသီး,Thit-taw-thei
+37,Black pepper,ငရုတ်ကောင်း,Nga-yok-kaung
+38,Bell Pepper,ငရုတ်ပွ,Nga-yok-pwa
+39,Culantro,ရှမ်းနံနံ,Shan-nan-nan
+40,Celery,တရုတ်နံနံ,Ta-yoke-nan-nan
+41,Bottle gourd,ဘူးသီး,Boo-thei
+42,Spinach,ဟင်းနုနွယ်,Hin-nu-nway
+43,Tealeaf,လက်ဖက်ရွက်,Laphet-ywet
+44,Broccoli,ပန်းမုံလာစိမ်း,Pan-mon-la-sein
+47,Pomelo,ကျွဲကောသီး,Kywe-kaw-thei
+48,Tamarind,မကျည်းသီး,Ma-kyee-thei
+51,Avocado,ထောပတ်သီး,Htaw-bat-thei
+53,Durian,ဒူရင်းသီး,Du-yin-thei
+61,Lemon,သံပုရာသီး,Than-pa-yar-thei
+62,Money tree,ပိုက်ဆံပင်,Pai-san-pin
+63,Sacred fig,ညောင်ဗုဒ္ဓဟေပင်,Nyaung-pin
+64,Freshwater mangrove,လမုပင် / ကညင်,Lamut-pin
+68,Plum tree,ဇီးပင်,Zee-pin
+71,Cat-tail,မြက်လျှော်,Cat-tail
+65,Elephant Ear Taro,ဆင်နားရွက်ပိန်း,Hsin-naywe-pein
+66,Water Bamboo,ရေဝါ,Ye-wa
+68,Taro,ပိန်းဥ,Pein-U
+70,Lemon Grass,စပါးလင်,Sa-ba-lin
+71,Cassod Tree,မယ်ဇလီပင်,Mel-za-li
+72,Docynia (Wild Apple),ပင်းစိမ်း / မြို့သီး,Pin-sein / Docynia
+73,Jackfruit,ပိန္နဲသီး,Peinne-thei
+74,Indian Gooseberry,ဇီးဖြူသီး,Zee-phyu-thei
+75,Mango,သရက်သီး,Tha-yet-thei
+76,Coleus,ရောင်စုံရွက်လှ,Rong-sone-ywet-hla
+77,Watercress,ရေကဆွန်း,Ye-ka-swun
+78,Rice (Paddy),စပါး,Sa-ba
+79,Sesame,နှမ်း,Hnan
+80,Groundnut,မြေပဲ,Myay-pe
+81,Chickpea,ကုလားပဲ,Kala-pe
+82,Black Gram,မတ်ပဲ,Mat-pe
+84,Pigeon Pea,ပဲစဉ်းငုံ,Pe-singon
+85,Sugarcane,ကြံ,Kyan
+86,Cotton,ဝါ,Wa
+87,Coffee,ကော်ဖီ,Coffee
+88,Betel Leaf,ကွမ်းရွက်,Kunt-ywet
+89,Betel Nut,ကွမ်းသီး,Kunt-thei
+90,Okra,ရုံပတီသီး,Yone-padi
+91,Bitter Gourd,ကြက်ဟင်းခါးသီး,Krak-hinga
+92,Roselle,ချဉ်ပေါင်,Chin-baung
+93,Yardlong Bean,ပဲတောင့်ရှည်,Pe-daung-shwe
+94,Sunflower,နေကြာ,Ney-gyar
+95,Soybean,ပဲပုပ်,Pe-soke
+96,Cashew Nut,သီဟိုဠ်သီး,Thi-ho-thay-thi
+97,Mangosteen,မင်းကွတ်သီး,Ming-kut
+98,Coconut Palm,အုန်းသီး / အုန်းပင်,Ohn-thei
+99,Longan,လောင်ဂန်သီး,Longan-thei
+100,Cassava,ပလောပီနံ,Pa-law-pin-nan
+101,Mustard Greens,မုန်ညင်းရွက်,Mone-nyin
+102,Ridge Gourd,ခဝဲသီး,Kha-we-thei
+103,Morning Glory,ကန်စွန်းရွက်,Gazun-ywet
+104,Drumstick,ဒဏ်ဒလွန်သီး,Dain-tha-lun

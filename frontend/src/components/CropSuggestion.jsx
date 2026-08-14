@@ -1,25 +1,33 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
   CircleDollarSign,
   CircleCheck,
   Droplets,
+  Heart,
   FlaskConical,
-  LandPlot,
   Leaf,
   Lightbulb,
   MapPin,
   Satellite,
   Scale,
+  Save,
   Sparkles,
   Sprout,
   ThermometerSun,
   TriangleAlert,
+  UserRound,
   Wheat,
   X,
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { API_BASE_URL } from '../api';
+import { accountRequest } from '../accountApi.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const mockSuggestions = {
   Rice: { icon: '🌾', match: 94, marketRate: 1450, yieldPerAcre: 2100, reason: 'Warm temperatures, balanced soil pH, and strong rainfall make these conditions well suited for rice.' },
@@ -43,6 +51,33 @@ const cropIconMap = {
   Sesame: Leaf,
 };
 
+const CONDITION_LIMITS = {
+  soil_pH: [0, 14],
+  rainfall_mm: [0, 10000],
+  temperature_c: [-50, 70],
+};
+
+const cropMapCenter = [20.0, 96.0];
+const cropMapIcon = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41],
+});
+
+function CropMapClickHandler({ onSelect }) {
+  useMapEvents({ click: (event) => onSelect([event.latlng.lat, event.latlng.lng]) });
+  return null;
+}
+
+function CropMapPositionUpdater({ position }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) map.flyTo(position, 8, { duration: 0.8 });
+  }, [map, position]);
+  return null;
+}
+
 function CropIcon({ cropKey, size = 32 }) {
   const Icon = cropIconMap[cropKey] || Sprout;
   return <Icon size={size} strokeWidth={1.8} aria-hidden="true" />;
@@ -60,6 +95,8 @@ function AdvisoryIcon({ severity }) {
 
 export default function CropSuggestion() {
   const { t, language } = useLanguage();
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
   
   // Form data — auto-filled by satellite or entered manually
   const [formData, setFormData] = useState({
@@ -73,6 +110,7 @@ export default function CropSuggestion() {
   const [locStatus, setLocStatus] = useState('idle'); // idle | detecting | fetching | done | error
   const [weatherData, setWeatherData] = useState(null);
   const [locError, setLocError] = useState(null);
+  const [mapPosition, setMapPosition] = useState(null);
   
   // ML prediction state
   const [suggestion, setSuggestion] = useState(null);
@@ -84,6 +122,7 @@ export default function CropSuggestion() {
   const [explaining, setExplaining] = useState(false);
   const [error, setError] = useState(null);
   const [marketWeight, setMarketWeight] = useState(100);
+  const [accountMessage, setAccountMessage] = useState('');
   
   const streamedTextRef = useRef('');
 
@@ -110,31 +149,8 @@ export default function CropSuggestion() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        setLocStatus('fetching');
-
-        try {
-          const response = await axios.post(`${API_BASE_URL}/location-weather`, {
-            latitude,
-            longitude,
-            language
-          });
-
-          const data = response.data;
-          setWeatherData(data);
-
-          // Auto-fill form with satellite data
-          setFormData({
-            soil_pH: data.current.soil_pH_estimate,
-            rainfall_mm: data.current.rainfall_7d_mm,
-            temperature_c: data.current.temperature_c,
-          });
-
-          setLocStatus('done');
-        } catch (err) {
-          console.error('Weather fetch error:', err);
-          setLocError(t('loc.error'));
-          setLocStatus('error');
-        }
+        setMapPosition([latitude, longitude]);
+        await applyLocationWeather(latitude, longitude);
       },
       (err) => {
         console.error('Geolocation error:', err);
@@ -202,6 +218,16 @@ export default function CropSuggestion() {
   // ─── Submit Prediction ────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const invalidCondition = Object.entries(CONDITION_LIMITS).find(([field, [min, max]]) => {
+      const value = Number(formData[field]);
+      return !Number.isFinite(value) || value < min || value > max;
+    });
+    if (invalidCondition) {
+      const [field, [min, max]] = invalidCondition;
+      const labels = { soil_pH: 'Soil pH', rainfall_mm: 'Rainfall', temperature_c: 'Temperature' };
+      setError(`${labels[field]} must be between ${min} and ${max}${field === 'rainfall_mm' ? ' mm' : field === 'temperature_c' ? ' °C' : ''}.`);
+      return;
+    }
     setLoading(true);
     setError(null);
     setSuggestion(null);
@@ -216,6 +242,7 @@ export default function CropSuggestion() {
           .map(([key, value]) => [key, Number(value)])
       );
       if (weatherData?.region?.name_en) payload.admin1 = weatherData.region.name_en;
+      if (weatherData?.current?.humidity_pct != null) payload.humidity_pct = Number(weatherData.current.humidity_pct);
       if (Object.values(payload).some((value) => typeof value === 'number' && !Number.isFinite(value))) {
         setError('Please enter valid numbers for all crop conditions.');
         setLoading(false);
@@ -254,6 +281,71 @@ export default function CropSuggestion() {
     setExplanation(recommendation.description);
   };
 
+  const applyLocationWeather = async (latitude, longitude) => {
+    setLocStatus('fetching');
+    setLocError(null);
+    try {
+      const response = await axios.post(`${API_BASE_URL}/location-weather`, {
+        latitude,
+        longitude,
+        language,
+      });
+      const data = response.data;
+      setWeatherData({ ...data, coordinates: { latitude, longitude } });
+      setFormData({
+        soil_pH: data.current.soil_pH_estimate,
+        rainfall_mm: data.current.rainfall_7d_mm,
+        temperature_c: data.current.temperature_c,
+        humidity_pct: data.current.humidity_pct,
+      });
+      setLocStatus('done');
+    } catch (err) {
+      console.error('Weather fetch error:', err);
+      setLocError(t('loc.error'));
+      setLocStatus('error');
+    }
+  };
+
+  const chooseMapLocation = (position) => {
+    setMapPosition(position);
+    applyLocationWeather(position[0], position[1]);
+  };
+
+  const saveRecommendation = async () => {
+    if (!currentUser || !selectedRecommendation) return;
+    try {
+      await accountRequest('/account/history', {
+        method: 'POST',
+        body: JSON.stringify({
+          crop: selectedRecommendation.crop,
+          cropKey: selectedRecommendation.cropKey,
+          suitabilityPercent: selectedRecommendation.suitabilityPercent,
+          inputs: formData,
+          location: {
+            ...(weatherData?.region || {}),
+            ...(weatherData?.coordinates || {}),
+          },
+        }),
+      });
+      setAccountMessage(t('account.analysisSaved') || 'Analysis saved to your account.');
+    } catch (requestError) {
+      setAccountMessage(requestError.message);
+    }
+  };
+
+  const favoriteRecommendation = async () => {
+    if (!currentUser || !selectedRecommendation) return;
+    try {
+      await accountRequest('/account/favorites', {
+        method: 'POST',
+        body: JSON.stringify({ cropKey: selectedRecommendation.cropKey, cropName: selectedRecommendation.crop }),
+      });
+      setAccountMessage(t('account.cropSaved') || 'Crop added to favorites.');
+    } catch (requestError) {
+      setAccountMessage(requestError.message);
+    }
+  };
+
   return (
     <div className={`crop-suggestion ${language === 'my' ? 'language-my' : ''}`}>
       <section className="crop-page-hero" aria-labelledby="crop-page-title">
@@ -265,7 +357,7 @@ export default function CropSuggestion() {
           <p>{t('crop.subtitle')}</p>
           <div className="crop-page-benefits" aria-label="Planner benefits">
             <span><Satellite size={16} /> {t('crop.benefitSatellite')}</span>
-            <span><LandPlot size={16} /> {t('crop.benefitLocal')}</span>
+            <span><Leaf size={16} /> {t('crop.benefitLocal')}</span>
             <span><Sprout size={16} /> {t('crop.benefitGuidance')}</span>
           </div>
         </div>
@@ -295,6 +387,22 @@ export default function CropSuggestion() {
                 {locStatus === 'fetching' && <><span className="spinner" /> {t('loc.fetchWeather')}</>}
                 {(locStatus === 'idle' || locStatus === 'error' || locStatus === 'done') && <><MapPin size={17} /> {t('loc.detect')}</>}
               </button>
+              <div className="crop-location-map-block">
+                <div className="crop-location-map-heading">
+                  <div><strong>{t('crop.chooseOnMap')}</strong><p>{t('crop.mapHint')}</p></div>
+                  {mapPosition && <small>{mapPosition[0].toFixed(4)}, {mapPosition[1].toFixed(4)}</small>}
+                </div>
+                <MapContainer center={cropMapCenter} zoom={6} scrollWheelZoom className="crop-location-map">
+                  <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <CropMapClickHandler onSelect={chooseMapLocation} />
+                  <CropMapPositionUpdater position={mapPosition} />
+                  {mapPosition && <Marker position={mapPosition} icon={cropMapIcon} />}
+                </MapContainer>
+                {weatherData?.region && (
+                  <div className="crop-map-region-badge"><MapPin size={15} /><span>{language === 'my' ? weatherData.region.name_my : weatherData.region.name_en}</span></div>
+                )}
+                {locStatus === 'fetching' && <p className="crop-map-status">{t('loc.fetchWeather')}</p>}
+              </div>
               {locError && <p className="crop-location-error" role="alert">{locError}</p>}
 
               {weatherData && (
@@ -322,9 +430,9 @@ export default function CropSuggestion() {
             <div><p>{t('crop.growingConditions')}</p><h2 id="crop-conditions-title">{t('crop.reviewField')}</h2></div>
           </header>
           {mode === 'auto' && weatherData && <p className="crop-form-note">{t('loc.override')}</p>}
-          <div className="form-group"><label htmlFor="soil-pH"><FlaskConical size={17} /> {t('crop.soilPh')}</label><input id="soil-pH" type="number" name="soil_pH" step="0.1" value={formData.soil_pH} onChange={handleChange} required /></div>
-          <div className="form-group"><label htmlFor="rainfall"><Droplets size={17} /> {t('crop.rainfall')}</label><input id="rainfall" type="number" name="rainfall_mm" step="1" value={formData.rainfall_mm} onChange={handleChange} required /></div>
-          <div className="form-group"><label htmlFor="temperature"><ThermometerSun size={17} /> {t('crop.temp')}</label><input id="temperature" type="number" name="temperature_c" step="0.1" value={formData.temperature_c} onChange={handleChange} required /></div>
+          <div className="form-group"><label htmlFor="soil-pH"><FlaskConical size={17} /> {t('crop.soilPh')}</label><input id="soil-pH" type="number" name="soil_pH" min="0" max="14" step="0.1" value={formData.soil_pH} onChange={handleChange} required /></div>
+          <div className="form-group"><label htmlFor="rainfall"><Droplets size={17} /> {t('crop.rainfall')}</label><input id="rainfall" type="number" name="rainfall_mm" min="0" max="10000" step="1" value={formData.rainfall_mm} onChange={handleChange} required /></div>
+          <div className="form-group"><label htmlFor="temperature"><ThermometerSun size={17} /> {t('crop.temp')}</label><input id="temperature" type="number" name="temperature_c" min="-50" max="70" step="0.1" value={formData.temperature_c} onChange={handleChange} required /></div>
           <button type="submit" className="btn btn-primary crop-suggestion-submit" disabled={loading || explaining}><Sprout size={18} />{loading ? t('crop.analyzing') : t('crop.suggestBtn')}</button>
           {error && <p className="crop-suggestion-error" role="alert">{error}</p>}
         </form>
@@ -479,6 +587,8 @@ export default function CropSuggestion() {
               <input 
                 type="number" 
                 name="soil_pH" 
+                min="0"
+                max="14"
                 step="0.1" 
                 value={formData.soil_pH} 
                 onChange={handleChange} 
@@ -490,6 +600,8 @@ export default function CropSuggestion() {
               <input 
                 type="number" 
                 name="rainfall_mm" 
+                min="0"
+                max="10000"
                 step="1" 
                 value={formData.rainfall_mm} 
                 onChange={handleChange} 
@@ -501,6 +613,8 @@ export default function CropSuggestion() {
               <input 
                 type="number" 
                 name="temperature_c" 
+                min="-50"
+                max="70"
                 step="0.1" 
                 value={formData.temperature_c} 
                 onChange={handleChange} 
@@ -634,6 +748,17 @@ export default function CropSuggestion() {
                 </p>
               </div>
 
+            </div>
+            {accountMessage && <p className="account-message">{accountMessage}</p>}
+            <div className="account-action-row">
+              {currentUser ? (
+                <>
+                  <button type="button" className="btn btn-secondary" onClick={saveRecommendation}><Save size={16} /> {t('account.saveAnalysis') || 'Save analysis'}</button>
+                  <button type="button" className="btn btn-secondary" onClick={favoriteRecommendation}><Heart size={16} /> {t('account.favorite') || 'Favorite crop'}</button>
+                </>
+              ) : (
+                <button type="button" className="btn btn-secondary" onClick={() => navigate('/?auth=signin')}><UserRound size={16} /> {t('account.signInToSave') || 'Sign in to save'}</button>
+              )}
             </div>
             <button type="button" className="btn btn-primary" onClick={() => setSuggestion(null)}>{t('common.close')}</button>
           </section>
