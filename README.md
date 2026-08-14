@@ -1,4 +1,4 @@
-# GreenVista
+﻿# GreenVista
 
 GreenVista is a React frontend and FastAPI backend for agricultural crop suggestions,
 field-health analysis, weather data, and NDVI analysis.
@@ -129,6 +129,10 @@ on revisit timing and cloud cover, so this is near-real-time rather than instant
 
 ### Crop suggestion data
 
-`POST /api/v1/crop-suggestion` uses `fastapi/app/data/crop_dataset.xls` for crop-criteria-based
-matching. Market prices come from the repository’s WFP price data and project price
-history. Crops without an available price are excluded from suggestions.
+Current dataset sources are `fastapi/app/data/price_dataset_merged.csv` for prices,
+`fastapi/app/data/crop_dataset (1)_aligned.xls` for suitability criteria, and
+`fastapi/app/data/crop_dataset_mm.xls` for Burmese crop names. The crop suggestion page
+supports GPS/map location selection and validates soil pH, rainfall, and temperature.
+
+The crop suggestion API uses the merged price, aligned criteria, and Burmese translation datasets listed above.
+Only crops with matching criteria and valid prices are recommended.
