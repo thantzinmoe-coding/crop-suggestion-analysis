@@ -1,4 +1,4 @@
-import { Bot, Home, Languages, LogOut, Radar, Sprout } from 'lucide-react'
+import { Bot, Home, Languages, LogOut, MessageSquareText, Radar, Sprout } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
@@ -6,6 +6,7 @@ import GreenVistaMark from './GreenVistaMark.jsx'
 
 const navItems = [
   { key: 'nav.landing', icon: Home, path: '/' },
+  { key: 'nav.community', icon: MessageSquareText, path: '/community-feed' },
   { key: 'nav.ndvi', icon: Radar, path: '/ndvi-analysis' },
   { key: 'nav.suggestion', icon: Sprout, path: '/crop-suggestion' },
   { key: 'nav.chat', icon: Bot, path: '/ai-chat' },

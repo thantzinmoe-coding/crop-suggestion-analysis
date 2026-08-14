@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AIChat from './components/AIChat.jsx'
+import CommunityFeed from './components/CommunityFeed.jsx'
 import CropSuggestion from './components/CropSuggestion.jsx'
 import NDVIAnalysis from './components/NDVIAnalysis.jsx'
 import DashboardLayout from './layouts/DashboardLayout.jsx'
@@ -31,6 +32,7 @@ function App() {
             <DashboardLayout />
           </ProtectedRoute>
         }>
+          <Route path="/community-feed" element={<CommunityFeed />} />
           <Route path="/ndvi-analysis" element={<NDVIAnalysis />} />
           <Route path="/crop-suggestion" element={<CropSuggestion />} />
           <Route path="/ai-chat" element={<AIChat />} />

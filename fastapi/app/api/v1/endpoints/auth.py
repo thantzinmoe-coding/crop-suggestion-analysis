@@ -3,10 +3,12 @@ import hmac
 import logging
 import secrets
 import smtplib
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr, Field
 
 from app.core.config import get_settings
@@ -14,6 +16,7 @@ from app.db.session import get_database
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 logger = logging.getLogger(__name__)
+bearer = HTTPBearer(auto_error=False)
 
 
 class Credentials(BaseModel):
@@ -68,10 +71,28 @@ def _send_welcome_email(recipient: str) -> bool:
     return True
 
 
-def _response(user: dict[str, Any], email_sent: bool = False) -> AuthResponse:
+async def _response(user: dict[str, Any], db: Any, email_sent: bool = False) -> AuthResponse:
     token = secrets.token_urlsafe(32)
     user_id = str(user["_id"])
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    await db.users.update_one({"_id": user["_id"]}, {"$set": {
+        "session_token_hash": token_hash,
+        "session_expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+    }})
     return AuthResponse(token=token, user={"id": user_id, "email": user["email"]}, email_sent=email_sent)
+
+
+async def require_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
+    db: Any = Depends(get_database),
+) -> dict[str, Any]:
+    if not credentials or credentials.scheme.lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Authentication required.")
+    token_hash = hashlib.sha256(credentials.credentials.encode()).hexdigest()
+    user = await db.users.find_one({"session_token_hash": token_hash})
+    if not user or user.get("session_expires_at") and user["session_expires_at"] < datetime.now(timezone.utc):
+        raise HTTPException(status_code=401, detail="Session expired. Please sign in again.")
+    return user
 
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
@@ -90,7 +111,7 @@ async def register(credentials: Credentials, db: Any = Depends(get_database)) ->
         # Do not discard a valid account if the optional mail provider is unavailable.
         logger.warning("Welcome email failed for %s: %s", email, exc)
         email_sent = False
-    return _response(user, email_sent)
+    return await _response(user, db, email_sent)
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -99,4 +120,4 @@ async def login(credentials: LoginCredentials, db: Any = Depends(get_database)) 
     user = await db.users.find_one({"email": email})
     if not user or not _check_password(credentials.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
-    return _response(user)
+    return await _response(user, db)

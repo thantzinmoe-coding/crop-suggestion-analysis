@@ -27,6 +27,9 @@ async def ensure_indexes() -> None:
         [("region_pcode", 1), ("observation_date", 1)], unique=True
     )
     await database.users.create_index("email", unique=True)
+    await database.farm_profiles.create_index("user_id", unique=True)
+    await database.saved_analyses.create_index([("user_id", 1), ("created_at", -1)])
+    await database.notifications.create_index([("user_id", 1), ("created_at", -1)])
 
 
 async def close_database() -> None:

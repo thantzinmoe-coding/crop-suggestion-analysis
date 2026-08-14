@@ -18,8 +18,9 @@ import {
   Wheat,
   X,
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext';
-import { API_BASE_URL } from '../api';
+import { API_BASE_URL, authHeaders } from '../api';
 
 const mockSuggestions = {
   Rice: { icon: '🌾', match: 94, marketRate: 1450, yieldPerAcre: 2100, reason: 'Warm temperatures, balanced soil pH, and strong rainfall make these conditions well suited for rice.' },
@@ -60,6 +61,8 @@ function AdvisoryIcon({ severity }) {
 
 export default function CropSuggestion() {
   const { t, language } = useLanguage();
+  const { currentUser } = useAuth();
+  const [shareStatus, setShareStatus] = useState('');
   
   // Form data — auto-filled by satellite or entered manually
   const [formData, setFormData] = useState({
@@ -252,6 +255,58 @@ export default function CropSuggestion() {
     setSuggestion(recommendation.crop);
     setPredictionConfidence(recommendation.suitabilityPercent);
     setExplanation(recommendation.description);
+  };
+
+  const shareToCommunity = async () => {
+    if (!currentUser || !selectedRecommendation) return;
+
+    try {
+      setShareStatus('Sharing...');
+      const response = await fetch(`${API_BASE_URL}/community/posts`, {
+        method: 'POST',
+        headers: authHeaders(currentUser.token, true),
+        body: JSON.stringify({
+          userId: currentUser.id,
+          userName: currentUser.email?.split('@')[0] || 'Farmer',
+          content: `I checked crop suitability for ${selectedRecommendation.crop}. The model suggests ${selectedRecommendation.suitabilityPercent}% suitability in this field. ${selectedRecommendation.description}`,
+          postType: 'analysis',
+          crop: selectedRecommendation.crop,
+          region: weatherData?.region?.name_en || weatherData?.region?.name_my || 'Local field',
+          sourceAnalysisId: `crop-suggestion-${Date.now()}`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to share analysis to the community.');
+      }
+
+      setShareStatus('Analysis shared successfully.');
+    } catch (err) {
+      console.error('Share analysis error:', err);
+      setShareStatus(err.message || 'Unable to share analysis.');
+    }
+  };
+
+  const saveAnalysis = async () => {
+    if (!currentUser || !selectedRecommendation) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/social/saved-analyses`, {
+        method: 'POST',
+        headers: authHeaders(currentUser.token, true),
+        body: JSON.stringify({
+          title: `${selectedRecommendation.crop} suitability analysis`,
+          analysisType: 'crop-suggestion',
+          summary: `${selectedRecommendation.suitabilityPercent}% suitability. ${selectedRecommendation.description}`,
+          crop: selectedRecommendation.crop,
+          region: weatherData?.region?.name_en || weatherData?.region?.name_my || 'Local field',
+          metadata: { suitabilityPercent: selectedRecommendation.suitabilityPercent, marketPriceMmkPerKg: selectedPrice },
+        }),
+      });
+      if (!response.ok) throw new Error('Unable to save analysis.');
+      setShareStatus('Analysis saved to your account.');
+    } catch (err) {
+      setShareStatus(err.message);
+    }
   };
 
   return (
@@ -635,7 +690,16 @@ export default function CropSuggestion() {
               </div>
 
             </div>
-            <button type="button" className="btn btn-primary" onClick={() => setSuggestion(null)}>{t('common.close')}</button>
+            <div className="flex gap-3">
+              <button type="button" className="btn btn-secondary" onClick={() => setSuggestion(null)}>{t('common.close')}</button>
+              <button type="button" className="btn btn-secondary" onClick={saveAnalysis} disabled={!currentUser}>
+                {currentUser ? 'Save analysis' : 'Login to save'}
+              </button>
+              <button type="button" className="btn btn-primary" onClick={shareToCommunity} disabled={!currentUser}>
+                {currentUser ? 'Share to community' : 'Login to share'}
+              </button>
+            </div>
+            {shareStatus && <p className="crop-suggestion-error" style={{ marginTop: '0.8rem', marginBottom: 0 }}>{shareStatus}</p>}
           </section>
         </div>
       )}
