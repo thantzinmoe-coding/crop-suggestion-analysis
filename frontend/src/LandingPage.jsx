@@ -62,6 +62,8 @@ const landingText = {
     stepLocate: 'Locate', stepLocateDescription: 'Use your position or enter field conditions manually.',
     stepUnderstand: 'Understand', stepUnderstandDescription: 'Review satellite weather, vegetation trends, and practical advisories.',
     stepDecide: 'Decide', stepDecideDescription: 'Compare crops and move forward with clearer context.',
+    heroImageAlt: 'Farmers transplanting young rice seedlings in a paddy field at sunrise',
+    platformImageAlt: 'Aerial view of healthy rice fields and irrigation channels in morning light',
   },
   my: {
     
@@ -98,6 +100,8 @@ const landingText = {
   "stepUnderstandDescription": "ဂြိုဟ်တု ရာသီဥတု၊ အပင်ဖြစ်ထွန်းမှုနှင့် လက်တွေ့ကျသော အကြံပြုချက်များကို စစ်ဆေးပါ။",
   "stepDecide": "ဆုံးဖြတ်ချက်ချရန်",
   "stepDecideDescription": "သီးနှံများကို အပြန်အလှန် နှိုင်းယှဉ်ပြီး စိတ်ချယုံကြည်စွာ စိုက်ပျိုးပါ",
+  "heroImageAlt": "နေထွက်ချိန် စပါးခင်းတွင် ပျိုးပင်ငယ်များ စိုက်ပျိုးနေသော တောင်သူများ",
+  "platformImageAlt": "နံနက်ခင်းအလင်းရောင်အောက်ရှိ စိမ်းလန်းသော စပါးခင်းများနှင့် ရေသွင်းမြောင်းများ၏ ကောင်းကင်မြင်ကွင်း",
 
   "capabilityHealth": "စိုက်ခင်းအခြေအနေကို ရှင်းလင်းစွာ ကြည့်ရှုပါ။",
   "capabilityHealthDescription": "ဒေသတွင်း NDVI အချက်အလက်များကို ဖတ်ရှုလွယ်သော အပင်အခြေအနေ လမ်းကြောင်းများအဖြစ် ပြောင်းလဲပေးပါသည်။",
@@ -133,20 +137,20 @@ function LandingPage() {
 
   return (
     <main className={`agro-site ${language === 'my' ? 'language-my' : ''}`}>
-      <a className="agro-skip-link" href="#platform">Skip to main content</a>
+      <a className="agro-skip-link" href="#platform">{t('common.skipToMain')}</a>
       <section className="agro-hero" aria-labelledby="hero-title">
         <img
           className="agro-hero-art"
           src="/images/agroguard-farmers-hero.webp"
-          alt="Farmers transplanting young rice seedlings in a paddy field at sunrise"
+          alt={lt('heroImageAlt')}
           width="1672"
           height="941"
           fetchPriority="high"
         />
         <div className="agro-hero-shade" aria-hidden="true" />
 
-        <nav className="agro-nav" aria-label="Primary navigation">
-          <a className="agro-brand" href="#top" aria-label="GreenVista home">
+        <nav className="agro-nav" aria-label={t('nav.workspaceNavigation')}>
+          <a className="agro-brand" href="#top" aria-label={t('brand.home')}>
             <span className="agro-brand-mark"><GreenVistaMark /></span>
             <span>GREEN<strong>VISTA</strong></span>
           </a>
@@ -160,7 +164,7 @@ function LandingPage() {
 
           {currentUser ? (
             <div className="agro-nav-account">
-              <div className="agro-home-language" aria-label="Language selector">
+              <div className="agro-home-language" aria-label={t('language.selector')}>
                 <Languages size={18} aria-hidden="true" />
                 <button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
                 <button type="button" className={language === 'my' ? 'active' : ''} aria-pressed={language === 'my'} onClick={() => setLanguage('my')}>MY</button>
@@ -172,7 +176,7 @@ function LandingPage() {
             </div>
           ) : (
             <div className="agro-nav-account">
-              <div className="agro-home-language" aria-label="Language selector">
+              <div className="agro-home-language" aria-label={t('language.selector')}>
                 <Languages size={18} aria-hidden="true" />
                 <button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button>
                 <button type="button" className={language === 'my' ? 'active' : ''} aria-pressed={language === 'my'} onClick={() => setLanguage('my')}>MY</button>
@@ -225,7 +229,7 @@ function LandingPage() {
         <figure className="agro-process-visual">
           <img
             src="/images/agroguard-field-intelligence.webp"
-            alt="Aerial view of healthy rice fields and irrigation channels in morning light"
+            alt={lt('platformImageAlt')}
             loading="lazy"
             decoding="async"
           />

@@ -15,7 +15,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
   const [loading, setLoading] = useState(false)
   
   const { login, register } = useAuth()
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -54,7 +54,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
           )
               ? 'auth.passwordTooShort'
               : null
-      setError(messageKey ? t(messageKey) : err.message)
+      setError(messageKey ? t(messageKey) : (language === 'my' ? t('auth.requestError') : err.message))
     } finally {
       setLoading(false)
     }
@@ -81,7 +81,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
         <button 
           type="button" 
           onClick={onClose} 
-          aria-label="Close authentication dialog"
+          aria-label={t('auth.closeDialog')}
           className="absolute right-5 top-5 grid h-10 w-10 place-items-center rounded-xl text-slate-500 transition hover:bg-myanglow-sage/40 hover:text-myanglow-navy"
         >
           <X size={19} />
@@ -162,7 +162,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
                 <button
                   type="button"
                   onClick={() => setShowPassword(value => !value)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                   className="absolute right-4 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-slate-400 shadow-none outline-none transition hover:bg-transparent hover:text-myanglow-forest focus:bg-transparent focus:outline-none focus:ring-0"
                 >
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -188,7 +188,7 @@ export default function AuthModal({ initialMode = 'signin', onClose, onSuccess }
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(value => !value)}
-                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    aria-label={showConfirmPassword ? t('auth.hideConfirmPassword') : t('auth.showConfirmPassword')}
                     className="absolute right-4 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-slate-400 shadow-none outline-none transition hover:bg-transparent hover:text-myanglow-forest focus:bg-transparent focus:outline-none focus:ring-0"
                   >
                     {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}

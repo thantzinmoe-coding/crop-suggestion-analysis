@@ -43,6 +43,25 @@ HUMIDITY_MAP = {
     "MMR017": 62, "MMR018": 75,
 }
 
+# Regional fallback climate estimates used when no live weather provider is
+# configured. Keeping them keyed by PCODE ensures a map selection refreshes
+# every growing-condition field instead of changing only the soil estimate.
+TEMPERATURE_MAP = {
+    "MMR001": 29.5, "MMR002": 27.5, "MMR003": 30.5, "MMR004": 30.0,
+    "MMR005": 27.0, "MMR006": 27.2, "MMR007": 24.5, "MMR008": 25.0,
+    "MMR009": 27.0, "MMR010": 22.0, "MMR011": 27.0, "MMR012": 26.5,
+    "MMR013": 22.5, "MMR014": 27.5, "MMR015": 28.5, "MMR016": 23.5,
+    "MMR017": 24.5, "MMR018": 27.0,
+}
+
+RAINFALL_7D_MAP = {
+    "MMR001": 50, "MMR002": 160, "MMR003": 35, "MMR004": 40,
+    "MMR005": 230, "MMR006": 180, "MMR007": 150, "MMR008": 90,
+    "MMR009": 175, "MMR010": 120, "MMR011": 210, "MMR012": 220,
+    "MMR013": 100, "MMR014": 170, "MMR015": 80, "MMR016": 95,
+    "MMR017": 80, "MMR018": 170,
+}
+
 
 def _get_ow_api_key() -> str | None:
     settings = get_settings()
@@ -87,6 +106,16 @@ def _estimate_soil_pH(lat: float, lon: float) -> float:
 def _estimate_humidity(lat: float, lon: float) -> int:
     pcode, _ = _find_nearest_region(lat, lon)
     return HUMIDITY_MAP.get(pcode, 70)
+
+
+def _estimate_temperature(lat: float, lon: float) -> float:
+    pcode, _ = _find_nearest_region(lat, lon)
+    return TEMPERATURE_MAP.get(pcode, 28.0)
+
+
+def _estimate_rainfall_7d(lat: float, lon: float) -> float:
+    pcode, _ = _find_nearest_region(lat, lon)
+    return RAINFALL_7D_MAP.get(pcode, 120)
 
 
 def _generate_advisories(
@@ -199,9 +228,9 @@ async def get_location_weather(lat: float, lon: float, language: str) -> dict:
         )
         rainfall_7d = rainfall * 7
     else:
-        temp = 28.0
+        temp = _estimate_temperature(lat, lon)
         humidity = _estimate_humidity(lat, lon)
-        rainfall_7d = 120
+        rainfall_7d = _estimate_rainfall_7d(lat, lon)
 
     soil_pH = _estimate_soil_pH(lat, lon)
     advisories = _generate_advisories(temp, rainfall_7d, humidity)

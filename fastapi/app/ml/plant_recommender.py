@@ -1,12 +1,13 @@
+import re
 from functools import lru_cache
 from pathlib import Path
-import re
 
 import pandas as pd
 
 PRICE_MERGED_PATH = Path(__file__).resolve().parents[1] / "data" / "price_dataset_merged.csv"
 CRITERIA_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "crop_dataset (1)_aligned.xls"
 MYANMAR_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "crop_dataset_mm.xls"
+PLANT_DETAILS_PATH = Path(__file__).resolve().parents[1] / "data" / "plants.csv"
 NAME_ALIASES = {
     "corn (maize)": "corn",
     "tea leaf": "tealeaf",
@@ -27,6 +28,10 @@ _CROP_NAMES_MY = {
 
 class PlantDatasetUnavailableError(RuntimeError):
     """Raised when the plants dataset cannot be read."""
+
+
+def _average(low: object, high: object) -> float:
+    return round((float(low) + float(high)) / 2, 1)
 
 
 def _name_key(value: object) -> str:
@@ -71,6 +76,91 @@ def _load_plants() -> pd.DataFrame:
         return plants
     except Exception as exc:
         raise PlantDatasetUnavailableError(f"The crop datasets are invalid: {PRICE_MERGED_PATH} and {CRITERIA_DATA_PATH}") from exc
+
+
+@lru_cache(maxsize=1)
+def _load_light_requirements() -> dict[str, str]:
+    try:
+        details = pd.read_csv(PLANT_DETAILS_PATH)
+        if not {"plant_name", "sunlight"}.issubset(details.columns):
+            return {}
+        details["crop_key"] = details["plant_name"].map(_name_key)
+        return {
+            str(row["crop_key"]): str(row["sunlight"]).strip()
+            for _, row in details.drop_duplicates("crop_key").iterrows()
+            if str(row["sunlight"]).strip()
+        }
+    except (OSError, ValueError):
+        return {}
+
+
+def search_crop_requirements(
+    query: str,
+    language: str = "en",
+    limit: int = 10,
+) -> list[dict[str, object]]:
+    plants = _load_plants().drop_duplicates("crop_key").copy()
+    light_requirements = _load_light_requirements()
+    localized_names: dict[object, str] = {}
+    if language == "my":
+        try:
+            myanmar = pd.read_csv(MYANMAR_DATA_PATH)
+            localized_names = {
+                row["plant_id"]: str(row["burmese_name_mm"]).strip()
+                for _, row in myanmar.drop_duplicates("plant_id").iterrows()
+            }
+        except (OSError, ValueError, KeyError):
+            localized_names = {}
+
+    normalized_query = query.strip().casefold()
+    results: list[dict[str, object]] = []
+    for _, plant in plants.iterrows():
+        name_en = str(plant["plant_name"]).strip()
+        localized_name = localized_names.get(plant.get("plant_id"), name_en)
+        searchable_names = (name_en.casefold(), localized_name.casefold())
+        if normalized_query and not any(normalized_query in name for name in searchable_names):
+            continue
+
+        light = light_requirements.get(str(plant["crop_key"]), "Not available")
+        water_need = str(plant["water_need"]).strip()
+        if language == "my":
+            light = {
+                "Full Sun": "နေရောင်အပြည့်",
+                "Partial Sun": "နေရောင်တစ်စိတ်တစ်ပိုင်း",
+                "Not available": "အချက်အလက် မရှိပါ",
+            }.get(light, light)
+            water_need = {
+                "High": "များ",
+                "Medium": "အလယ်အလတ်",
+                "Low": "နည်း",
+            }.get(water_need, water_need)
+
+        results.append(
+            {
+                "crop": localized_name,
+                "crop_key": name_en,
+                "average_temperature_c": _average(
+                    plant["lowest_temp"], plant["highest_temp"]
+                ),
+                "water_need": water_need,
+                "average_soil_ph": _average(
+                    plant["soil_ph_min"], plant["soil_ph_max"]
+                ),
+                "average_humidity_pct": _average(
+                    plant["humidity_min"], plant["humidity_max"]
+                ),
+                "light_intensity": light,
+            }
+        )
+
+    results.sort(
+        key=lambda item: (
+            str(item["crop_key"]).casefold() != normalized_query,
+            not str(item["crop_key"]).casefold().startswith(normalized_query),
+            str(item["crop_key"]),
+        )
+    )
+    return results[:limit]
 
 
 def recommend_plants(

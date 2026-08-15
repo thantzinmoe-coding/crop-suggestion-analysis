@@ -1,4 +1,4 @@
-import { Bot, Home, Languages, LogIn, LogOut, Radar, Sprout, UserRound } from 'lucide-react'
+import { Bot, BookOpenText, Home, Languages, LogIn, LogOut, Radar, Sprout, UserRound } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
@@ -8,6 +8,7 @@ const navItems = [
   { key: 'nav.landing', icon: Home, path: '/' },
   { key: 'nav.ndvi', icon: Radar, path: '/ndvi-analysis' },
   { key: 'nav.suggestion', icon: Sprout, path: '/crop-suggestion' },
+  { key: 'nav.cropGuide', icon: BookOpenText, path: '/crop-guide' },
   { key: 'nav.chat', icon: Bot, path: '/ai-chat' },
 ]
 
@@ -22,8 +23,8 @@ function DesktopSidebar() {
   }
 
   return (
-    <aside className="gv-desktop-sidebar" aria-label="Workspace sidebar">
-      <Link className="gv-sidebar-brand" to="/" aria-label="GreenVista home">
+    <aside className="gv-desktop-sidebar" aria-label={t('nav.workspaceSidebar')}>
+      <Link className="gv-sidebar-brand" to="/" aria-label={t('brand.home')}>
         <span><GreenVistaMark /></span>
         <span>GREEN<strong>VISTA</strong></span>
       </Link>
@@ -34,7 +35,7 @@ function DesktopSidebar() {
         <span>{t('nav.sidebarDescription')}</span>
       </div>
 
-      <nav className="gv-sidebar-nav" aria-label="Workspace navigation">
+      <nav className="gv-sidebar-nav" aria-label={t('nav.workspaceNavigation')}>
         {navItems.map(({ key, icon: Icon, path }) => (
           <NavLink key={path} to={path} end={path === '/'}>
             <Icon size={19} aria-hidden="true" />
@@ -44,7 +45,7 @@ function DesktopSidebar() {
       </nav>
 
       <div className="gv-sidebar-footer">
-        <div className="gv-sidebar-language" aria-label="Language selector">
+        <div className="gv-sidebar-language" aria-label={t('language.selector')}>
           <Languages size={17} aria-hidden="true" />
           <button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button>
           <button type="button" className={language === 'my' ? 'active' : ''} onClick={() => setLanguage('my')}>MY</button>
@@ -52,7 +53,7 @@ function DesktopSidebar() {
         {currentUser ? (
           <>
             {currentUser.email && <p className="gv-sidebar-email" title={currentUser.email}>{currentUser.email}</p>}
-            <button className="gv-sidebar-signout" type="button" onClick={() => navigate('/account')}>
+            <button className="gv-sidebar-signout mb-3" type="button" onClick={() => navigate('/account')}>
               <UserRound size={17} aria-hidden="true" />
               {t('account.title') || 'My account'}
             </button>

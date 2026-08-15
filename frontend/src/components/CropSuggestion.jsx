@@ -224,8 +224,15 @@ export default function CropSuggestion() {
     });
     if (invalidCondition) {
       const [field, [min, max]] = invalidCondition;
-      const labels = { soil_pH: 'Soil pH', rainfall_mm: 'Rainfall', temperature_c: 'Temperature' };
-      setError(`${labels[field]} must be between ${min} and ${max}${field === 'rainfall_mm' ? ' mm' : field === 'temperature_c' ? ' °C' : ''}.`);
+      const labels = { soil_pH: t('crop.soilPh'), rainfall_mm: t('crop.rainfall'), temperature_c: t('crop.temp') };
+      const unit = field === 'rainfall_mm' ? ' mm' : field === 'temperature_c' ? ' °C' : '';
+      setError(
+        t('crop.rangeError')
+          .replace('{field}', labels[field])
+          .replace('{min}', min)
+          .replace('{max}', max)
+          .replace('{unit}', unit)
+      );
       return;
     }
     setLoading(true);
@@ -244,7 +251,7 @@ export default function CropSuggestion() {
       if (weatherData?.region?.name_en) payload.admin1 = weatherData.region.name_en;
       if (weatherData?.current?.humidity_pct != null) payload.humidity_pct = Number(weatherData.current.humidity_pct);
       if (Object.values(payload).some((value) => typeof value === 'number' && !Number.isFinite(value))) {
-        setError('Please enter valid numbers for all crop conditions.');
+        setError(t('crop.invalidNumbers'));
         setLoading(false);
         return;
       }
@@ -259,12 +266,12 @@ export default function CropSuggestion() {
       setSelectedRecommendationIndex(0);
       setExplanation(
         response.data.recommendations?.[0]?.description
-        || `${crop} is the best rule-based match for the supplied conditions.`
+        || t('crop.fallbackMatch').replace('{crop}', crop)
       );
       setLoading(false);
     } catch (err) {
       console.error('Crop prediction error:', err);
-      setError(err.response?.data?.detail || 'Unable to get a crop suggestion.');
+      setError(language === 'my' ? t('crop.suggestionError') : (err.response?.data?.detail || t('crop.suggestionError')));
       setLoading(false);
     }
   };
@@ -329,7 +336,7 @@ export default function CropSuggestion() {
       });
       setAccountMessage(t('account.analysisSaved') || 'Analysis saved to your account.');
     } catch (requestError) {
-      setAccountMessage(requestError.message);
+      setAccountMessage(language === 'my' ? t('account.requestError') : requestError.message);
     }
   };
 
@@ -342,7 +349,7 @@ export default function CropSuggestion() {
       });
       setAccountMessage(t('account.cropSaved') || 'Crop added to favorites.');
     } catch (requestError) {
-      setAccountMessage(requestError.message);
+      setAccountMessage(language === 'my' ? t('account.requestError') : requestError.message);
     }
   };
 
@@ -355,7 +362,7 @@ export default function CropSuggestion() {
             {language === 'my' ? 'သင့်လယ်ကွင်းအတွက် သင့်တော်သော သီးနှံကို ရွေးချယ်ပါ။' : 'Choose what grows best here.'}
           </h1>
           <p>{t('crop.subtitle')}</p>
-          <div className="crop-page-benefits" aria-label="Planner benefits">
+          <div className="crop-page-benefits" aria-label={t('crop.plannerBenefits')}>
             <span><Satellite size={16} /> {t('crop.benefitSatellite')}</span>
             <span><Leaf size={16} /> {t('crop.benefitLocal')}</span>
             <span><Sprout size={16} /> {t('crop.benefitGuidance')}</span>
@@ -646,14 +653,14 @@ export default function CropSuggestion() {
                 <div>
                   <p className="suggestion-eyebrow">{t('crop.recommended')}</p>
                   <h2>{suggestion}</h2>
-                  <span className="match-badge">{predictionConfidence ?? cropDetails[suggestion]?.match}% model confidence</span>
+                  <span className="match-badge">{predictionConfidence ?? cropDetails[suggestion]?.match}% {t('crop.modelConfidence')}</span>
                 </div>
               </div>
 
               <div className="suggestion-stats">
-                <div><span>Best season</span><strong>{cropDetails[suggestion]?.season || 'Varies'}</strong></div>
-                <div><span>Harvest time</span><strong>{cropDetails[suggestion]?.harvest || 'Varies'}</strong></div>
-                <div><span>Water need</span><strong>{cropDetails[suggestion]?.water || 'Varies'}</strong></div>
+                <div><span>{t('crop.bestSeason')}</span><strong>{cropDetails[suggestion]?.season || t('crop.varies')}</strong></div>
+                <div><span>{t('crop.harvestTime')}</span><strong>{cropDetails[suggestion]?.harvest || t('crop.varies')}</strong></div>
+                <div><span>{t('crop.waterNeedLabel')}</span><strong>{cropDetails[suggestion]?.water || t('crop.varies')}</strong></div>
               </div>
               
               <div className="ai-explanation">
@@ -675,8 +682,8 @@ export default function CropSuggestion() {
 
       {suggestion && selectedRecommendation && (
         <div className="suggestion-modal-backdrop" onClick={() => setSuggestion(null)}>
-          <section className="suggestion-pop-card" role="dialog" aria-modal="true" aria-label="Crop suggestion" onClick={(event) => event.stopPropagation()}>
-            <button className="suggestion-close" type="button" aria-label="Close" onClick={() => setSuggestion(null)}>
+          <section className="suggestion-pop-card" role="dialog" aria-modal="true" aria-label={t('crop.dialogLabel')} onClick={(event) => event.stopPropagation()}>
+            <button className="suggestion-close" type="button" aria-label={t('common.close')} onClick={() => setSuggestion(null)}>
               <X size={20} />
             </button>
             <div className="suggestion-crop-icon">
@@ -699,7 +706,7 @@ export default function CropSuggestion() {
             <div className="crop-market-price-summary">
               <span>{t('crop.latestMarketPrice')}</span>
               <strong>{selectedPrice.toLocaleString()} MMK/kg</strong>
-              <small>{selectedRecommendation.marketPriceSource || 'Project history'}{selectedRecommendation.marketPriceObservedDate ? ` · ${selectedRecommendation.marketPriceObservedDate}` : ''}</small>
+              <small>{selectedRecommendation.marketPriceSource || t('crop.projectHistory')}{selectedRecommendation.marketPriceObservedDate ? ` · ${selectedRecommendation.marketPriceObservedDate}` : ''}</small>
             </div>
 
             {predictionRecommendations.length > 1 && (

@@ -88,7 +88,7 @@ export default function NDVIAnalysis() {
       } catch (err) {
         if (err.code !== 'ERR_CANCELED') {
           console.error('NDVI regions error:', err);
-          setError('Unable to load NDVI regions.');
+          setError(t('ndvi.regionsError'));
           setLoading(false);
         }
       }
@@ -96,7 +96,7 @@ export default function NDVIAnalysis() {
 
     loadRegions();
     return () => controller.abort();
-  }, []);
+  }, [language]);
 
   const states = regions.filter((region) => region.level === 'state' || !region.PCODE.includes('D'));
   const districts = regions
@@ -166,7 +166,7 @@ export default function NDVIAnalysis() {
       } catch (err) {
         if (err.code !== 'ERR_CANCELED') {
           console.error('NDVI data error:', err);
-          setError('Unable to load NDVI measurements for this region.');
+          setError(t('ndvi.measurementsError'));
           setNdviData({ labels: [], vim: [], viq: [] });
         }
       } finally {
@@ -176,7 +176,7 @@ export default function NDVIAnalysis() {
 
     loadNdvi();
     return () => controller.abort();
-  }, [selectedPcode]);
+  }, [language, selectedPcode]);
 
   const chartData = {
     labels: ndviData?.labels || [],

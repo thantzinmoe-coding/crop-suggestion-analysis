@@ -1,4 +1,4 @@
-import { Bot, Home, Languages, LogIn, LogOut, Menu, Radar, Sprout, UserRound, X } from 'lucide-react'
+import { BookOpenText, Bot, Home, Languages, LogIn, LogOut, Menu, Radar, Sprout, UserRound, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -9,6 +9,7 @@ const navItems = [
   { key: 'nav.home', icon: Home, path: '/' },
   { key: 'nav.fieldHealth', icon: Radar, path: '/ndvi-analysis' },
   { key: 'nav.cropPlanner', icon: Sprout, path: '/crop-suggestion' },
+  { key: 'nav.cropGuide', icon: BookOpenText, path: '/crop-guide' },
   { key: 'nav.aiGuide', icon: Bot, path: '/ai-chat' },
 ]
 
@@ -46,12 +47,12 @@ function AppHeader() {
   return (
     <header className={`gv-app-header ${menuOpen ? 'menu-open' : ''}`}>
       <div className="gv-app-header-inner">
-        <Link className="gv-app-brand" to="/" aria-label="GreenVista home">
+        <Link className="gv-app-brand" to="/" aria-label={t('brand.home')}>
           <span className="gv-app-brand-mark"><GreenVistaMark /></span>
           <span>GREEN<strong>VISTA</strong></span>
         </Link>
 
-        <nav className="gv-app-links" aria-label="Workspace navigation">
+        <nav className="gv-app-links" aria-label={t('nav.workspaceNavigation')}>
           {navItems.map(({ key, path }) => (
             <NavLink key={path} to={path} end={path === '/'}>
               {t(key)}
@@ -60,7 +61,7 @@ function AppHeader() {
         </nav>
 
         <div className="gv-app-actions">
-          <div className="gv-language" aria-label="Language selector">
+          <div className="gv-language" aria-label={t('language.selector')}>
             <Languages size={16} aria-hidden="true" />
             <button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button>
             <button type="button" className={language === 'my' ? 'active' : ''} onClick={() => setLanguage('my')}>MY</button>
@@ -93,7 +94,7 @@ function AppHeader() {
               <div><span>{t('nav.navigate')}</span><strong>GreenVista</strong></div>
               <button type="button" aria-label={t('nav.close')} onClick={() => setMenuOpen(false)}><X size={20} /></button>
             </div>
-            <nav aria-label="Mobile workspace navigation">
+            <nav aria-label={t('nav.mobileWorkspaceNavigation')}>
               {navItems.map(({ key, icon: Icon, path }) => (
                 <NavLink key={path} to={path} end={path === '/'}>
                   <Icon size={19} aria-hidden="true" />

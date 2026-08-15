@@ -51,3 +51,13 @@ class PlantRecommendation(APIModel):
 
 class PlantSuggestionResponse(APIModel):
     recommendations: list[PlantRecommendation]
+
+
+class CropRequirement(APIModel):
+    crop: str
+    crop_key: str
+    average_temperature_c: float
+    water_need: str
+    average_soil_ph: float
+    average_humidity_pct: float
+    light_intensity: str

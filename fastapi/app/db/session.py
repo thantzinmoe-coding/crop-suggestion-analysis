@@ -32,6 +32,8 @@ async def ensure_indexes() -> None:
     await database.monitoring_preferences.create_index("user_id", unique=True)
     await database.favorite_crops.create_index([("user_id", 1), ("crop_key", 1)], unique=True)
     await database.recommendation_history.create_index([("user_id", 1), ("created_at", -1)])
+    await database.chat_conversations.create_index([("user_id", 1), ("updated_at", -1)])
+    await database.chat_conversations.create_index("id", unique=True)
 
 
 async def close_database() -> None:

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Annotated, Any
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -11,6 +12,7 @@ from app.schemas.account import (
     MonitoringPreferencesUpdate,
     RecommendationHistoryCreate,
 )
+from app.schemas.chat import ChatConversationCreate, ChatConversationUpdate
 
 router = APIRouter(prefix="/account", tags=["account"])
 
@@ -68,6 +70,67 @@ async def save_history(
     document["id"] = str(result.inserted_id)
     document.pop("_id", None)
     return document
+
+
+@router.get("/chat-conversations")
+async def get_chat_conversations(
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
+    db: Any = Depends(get_database),
+) -> list[dict[str, Any]]:
+    return await db.chat_conversations.find(
+        {"user_id": user["id"]}, {"_id": 0}
+    ).sort("updated_at", -1).limit(50).to_list(length=50)
+
+
+@router.post("/chat-conversations", status_code=status.HTTP_201_CREATED)
+async def create_chat_conversation(
+    payload: ChatConversationCreate,
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
+    db: Any = Depends(get_database),
+) -> dict[str, Any]:
+    now = _now()
+    document = payload.model_dump(by_alias=True)
+    document.update({
+        "id": str(uuid4()),
+        "user_id": user["id"],
+        "created_at": now,
+        "updated_at": now,
+    })
+    await db.chat_conversations.insert_one(document)
+    document.pop("_id", None)
+    return document
+
+
+@router.put("/chat-conversations/{conversation_id}")
+async def update_chat_conversation(
+    conversation_id: str,
+    payload: ChatConversationUpdate,
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
+    db: Any = Depends(get_database),
+) -> dict[str, Any]:
+    values = payload.model_dump(by_alias=True)
+    values["updated_at"] = _now()
+    result = await db.chat_conversations.update_one(
+        {"id": conversation_id, "user_id": user["id"]}, {"$set": values}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found.")
+    return _clean(await db.chat_conversations.find_one(
+        {"id": conversation_id, "user_id": user["id"]}, {"_id": 0}
+    )) or {"id": conversation_id, **values}
+
+
+@router.delete("/chat-conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_chat_conversation(
+    conversation_id: str,
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
+    db: Any = Depends(get_database),
+) -> None:
+    result = await db.chat_conversations.delete_one(
+        {"id": conversation_id, "user_id": user["id"]}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found.")
 
 
 @router.get("/favorites")

@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AIChat from './components/AIChat.jsx'
 import AccountPage from './components/AccountPage.jsx'
 import CropSuggestion from './components/CropSuggestion.jsx'
+import CropRequirements from './components/CropRequirements.jsx'
 import NDVIAnalysis from './components/NDVIAnalysis.jsx'
 import DashboardLayout from './layouts/DashboardLayout.jsx'
 import LandingPage from './LandingPage.jsx'
@@ -16,6 +17,7 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/ndvi-analysis" element={<NDVIAnalysis />} />
           <Route path="/crop-suggestion" element={<CropSuggestion />} />
+          <Route path="/crop-guide" element={<CropRequirements />} />
           <Route path="/ai-chat" element={<AIChat />} />
           <Route path="/account" element={<AccountPage />} />
         </Route>

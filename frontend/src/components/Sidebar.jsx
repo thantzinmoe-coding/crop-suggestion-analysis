@@ -1,4 +1,4 @@
-import { Home, Radar, Sprout, Bot, Languages, LogOut } from 'lucide-react'
+import { Home, Radar, Sprout, BookOpenText, Bot, Languages, LogOut } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -8,6 +8,7 @@ const navItems = [
   { key: 'nav.landing', icon: Home, path: '/' },
   { key: 'nav.ndvi', icon: Radar, path: '/ndvi-analysis' },
   { key: 'nav.suggestion', icon: Sprout, path: '/crop-suggestion' },
+  { key: 'nav.cropGuide', icon: BookOpenText, path: '/crop-guide' },
   { key: 'nav.chat', icon: Bot, path: '/ai-chat' },
 ]
 
@@ -48,7 +49,7 @@ function Sidebar({ mobileSidebarOpen, onClose }) {
 
         <button
           type="button"
-          aria-label="Close sidebar"
+          aria-label={t('nav.close')}
           className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-myanglow-sage text-myanglow-navy transition hover:bg-myanglow-sage/40 lg:hidden"
           onClick={onClose}
         >

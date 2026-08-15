@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from urllib.parse import urlparse
 
 from httpx import AsyncClient, HTTPStatusError, RequestError
 
@@ -21,7 +22,7 @@ SYSTEM_PROMPT_MY = """သင်သည် မြန်မာနိုင်ငံ
 - စိုက်ပျိုးရေးအပေါ် ရာသီဥတုသက်ရောက်မှု
 - NDVI နှင့် ဂြိုဟ်တုအပင်ကျန်းမာရေးခွဲခြမ်းစိတ်ဖြာခြင်း
 
-မြန်မာလယ်သမားများအတွက် လက်တွေ့ကျပြီး အသုံးဝင်သော အကြံဉာဏ်များကို မြန်မာဘာသာဖြင့် အလွန်တိုတောင်းစွာ (ဝါကျ ၂ ကြောင်း သို့မဟုတ် ၃ ကြောင်းသာ) ဖြေကြားပါ။"""
+မြန်မာလယ်သမားများအတွက် လက်တွေ့ကျပြီး အသုံးဝင်သော အကြံဉာဏ်များကို မြန်မာဘာသာဖြင့် အလွန်တိုတောင်းစွာ (ဝါကျ ၂ ကြောင်း သို့မဟုတ် ၃ ကြောင်းသာ) ဖြေကြားပါ။"""  # noqa: E501
 
 CROP_EXPLANATION_PROMPT_EN = (
     "You are an expert agricultural advisor for Myanmar.\n"
@@ -55,6 +56,14 @@ def _build_messages(messages: list[dict], language: str) -> list[dict]:
     return [{"role": "system", "content": system_prompt}, *messages]
 
 
+def _request_headers(endpoint: str, api_key: str | None) -> dict[str, str]:
+    headers = {"Content-Type": "application/json"}
+    hostname = urlparse(endpoint).hostname
+    if api_key and hostname not in {"localhost", "127.0.0.1", "::1"}:
+        headers["Authorization"] = f"Bearer {api_key}"
+    return headers
+
+
 async def stream_chat(
     messages: list[dict],
     language: str,
@@ -62,16 +71,8 @@ async def stream_chat(
     settings = get_settings()
     api_key = settings.llm_api_key.get_secret_value() if settings.llm_api_key else None
 
-    if not api_key:
-        yield _fallback_chat_response(messages, language)
-        return
-
     url = f"{settings.llm_endpoint.rstrip('/')}/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-    }
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
+    headers = _request_headers(settings.llm_endpoint, api_key)
     payload = {
         "model": settings.llm_model,
         "messages": _build_messages(messages, language),
@@ -123,10 +124,6 @@ async def stream_crop_explanation(
     settings = get_settings()
     api_key = settings.llm_api_key.get_secret_value() if settings.llm_api_key else None
 
-    if not api_key:
-        yield _fallback_crop_explanation(crop, language)
-        return
-
     prompt_template = CROP_EXPLANATION_PROMPT_MY if language == "my" else CROP_EXPLANATION_PROMPT_EN
     user_prompt = prompt_template.format(
         crop=crop,
@@ -140,11 +137,7 @@ async def stream_crop_explanation(
     ]
 
     url = f"{settings.llm_endpoint.rstrip('/')}/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-    }
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
+    headers = _request_headers(settings.llm_endpoint, api_key)
     payload = {
         "model": settings.llm_model,
         "messages": messages,

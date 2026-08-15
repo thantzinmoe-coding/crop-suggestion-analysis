@@ -4,8 +4,10 @@ from app.ml.plant_recommender import (
     PlantDatasetUnavailableError,
     recommend_crops,
     recommend_plants,
+    search_crop_requirements,
 )
 from app.schemas.crop_suggestion import (
+    CropRequirement,
     CropSuggestionRequest,
     CropSuggestionResponse,
     PlantSuggestionRequest,
@@ -17,6 +19,19 @@ from app.services.market_prices import (
 )
 
 router = APIRouter(tags=["crop-suggestion"])
+
+
+@router.get(
+    "/crop-requirements",
+    response_model=list[CropRequirement],
+    summary="Search crop growing requirements",
+)
+def crop_requirements(
+    query: str = "",
+    language: str = "en",
+    limit: int = 10,
+) -> list[dict[str, object]]:
+    return search_crop_requirements(query, language=language, limit=min(max(limit, 1), 100))
 
 
 @router.post(

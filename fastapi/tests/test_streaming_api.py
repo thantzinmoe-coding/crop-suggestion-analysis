@@ -15,7 +15,11 @@ def _parse_sse_data(body: str) -> list[dict]:
 
 
 @pytest.mark.asyncio
-async def test_chat_returns_valid_sse_json_without_api_key() -> None:
+async def test_chat_returns_valid_sse_json(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def fake_stream_chat(messages: list[dict], language: str):
+        yield f"Local response to: {messages[-1]['content']}"
+
+    monkeypatch.setattr("app.api.v1.endpoints.chat.stream_chat", fake_stream_chat)
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
@@ -31,7 +35,22 @@ async def test_chat_returns_valid_sse_json_without_api_key() -> None:
 
 
 @pytest.mark.asyncio
-async def test_crop_explanation_returns_valid_sse_json_without_api_key() -> None:
+async def test_crop_explanation_returns_valid_sse_json(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def fake_stream_crop_explanation(
+        soil_pH: float,
+        rainfall_mm: float,
+        temperature_c: float,
+        crop: str,
+        language: str,
+    ):
+        yield f"Local explanation for {crop}"
+
+    monkeypatch.setattr(
+        "app.api.v1.endpoints.crop_explanation.stream_crop_explanation",
+        fake_stream_crop_explanation,
+    )
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
