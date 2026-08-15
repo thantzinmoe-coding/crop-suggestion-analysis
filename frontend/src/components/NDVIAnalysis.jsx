@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Satellite, Leaf, TrendingUp, Info } from 'lucide-react';
+import { Satellite, Leaf, TrendingUp, Info, Droplets, FlaskConical, ThermometerSun } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { GeoJSON, MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -38,6 +38,20 @@ const mapIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], shadowSize: [41, 41],
 });
 
+const correlationFactors = [
+  { key: 'soil_pH', labelKey: 'ndvi.correlationSoilPh', icon: FlaskConical },
+  { key: 'rainfall_mm', labelKey: 'ndvi.correlationRainfall', icon: Droplets },
+  { key: 'temperature_c', labelKey: 'ndvi.correlationTemperature', icon: ThermometerSun },
+];
+
+function correlationDescription(value, t) {
+  if (value === null || value === undefined) return t('ndvi.correlationUnavailable');
+  const absolute = Math.abs(value);
+  const strength = absolute >= 0.7 ? 'strong' : absolute >= 0.4 ? 'moderate' : absolute >= 0.2 ? 'weak' : 'veryWeak';
+  const direction = value > 0.02 ? 'positive' : value < -0.02 ? 'negative' : 'neutral';
+  return `${t(`ndvi.correlation${strength[0].toUpperCase()}${strength.slice(1)}`)} · ${t(`ndvi.correlation${direction[0].toUpperCase()}${direction.slice(1)}`)}`;
+}
+
 function MapController({ position }) {
   const map = useMap();
   useEffect(() => {
@@ -63,6 +77,9 @@ export default function NDVIAnalysis() {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedPcode, setSelectedPcode] = useState('');
   const [ndviData, setNdviData] = useState({ labels: [], vim: [], viq: [] });
+  const [correlationData, setCorrelationData] = useState(null);
+  const [correlationLoading, setCorrelationLoading] = useState(false);
+  const [correlationError, setCorrelationError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [mapWarning, setMapWarning] = useState('');
@@ -177,6 +194,34 @@ export default function NDVIAnalysis() {
     loadNdvi();
     return () => controller.abort();
   }, [language, selectedPcode]);
+
+  useEffect(() => {
+    if (!selectedPcode) return undefined;
+    const controller = new AbortController();
+
+    const loadCorrelations = async () => {
+      try {
+        setCorrelationLoading(true);
+        setCorrelationError('');
+        const response = await axios.get(
+          `${API_BASE_URL}/analytics/ndvi-environment-correlation`,
+          { params: { pcode: selectedPcode }, signal: controller.signal }
+        );
+        setCorrelationData(response.data);
+      } catch (err) {
+        if (err.code !== 'ERR_CANCELED') {
+          console.error('NDVI environmental correlation error:', err);
+          setCorrelationData(null);
+          setCorrelationError(t('ndvi.correlationError'));
+        }
+      } finally {
+        if (!controller.signal.aborted) setCorrelationLoading(false);
+      }
+    };
+
+    loadCorrelations();
+    return () => controller.abort();
+  }, [selectedPcode, t]);
 
   const chartData = {
     labels: ndviData?.labels || [],
@@ -348,6 +393,47 @@ export default function NDVIAnalysis() {
           </div>
         </div>
       </div>
+
+      <section className="glass-panel ndvi-correlation-panel" aria-labelledby="ndvi-correlation-title">
+        <div className="ndvi-correlation-heading">
+          <div>
+            <div className="ndvi-controls-kicker">{t('ndvi.correlationKicker')}</div>
+            <h3 id="ndvi-correlation-title">{t('ndvi.correlationTitle')}</h3>
+            <p>{t('ndvi.correlationSubtitle')}</p>
+          </div>
+          {correlationData && (
+            <span className="ndvi-correlation-scope">
+              {t(correlationData.scope === 'regional' ? 'ndvi.correlationRegional' : 'ndvi.correlationNational')}
+            </span>
+          )}
+        </div>
+
+        {correlationLoading && <p className="ndvi-correlation-status">{t('ndvi.correlationLoading')}</p>}
+        {correlationError && <p className="crop-suggestion-error" role="alert">{correlationError}</p>}
+        {correlationData && !correlationLoading && (
+          <>
+            <div className="ndvi-correlation-grid">
+              {correlationFactors.map(({ key, labelKey, icon: FactorIcon }) => {
+                const value = correlationData.correlations?.[key];
+                const barStyle = value >= 0
+                  ? { left: '50%', width: `${Math.abs(value || 0) * 50}%` }
+                  : { right: '50%', width: `${Math.abs(value || 0) * 50}%` };
+                return (
+                  <article className="ndvi-correlation-card" key={key}>
+                    <div className="ndvi-correlation-card-title"><FactorIcon size={19} /><span>{t(labelKey)}</span></div>
+                    <strong>{value === null || value === undefined ? '—' : `${value >= 0 ? '+' : ''}${value.toFixed(3)}`}</strong>
+                    <div className="ndvi-correlation-meter" aria-hidden="true"><i /><span className={value >= 0 ? 'positive' : 'negative'} style={barStyle} /></div>
+                    <p>{correlationDescription(value, t)}</p>
+                  </article>
+                );
+              })}
+            </div>
+            <p className="ndvi-correlation-note">
+              {t('ndvi.correlationBasedOn')} {correlationData.sample_count} {t('ndvi.correlationMonths')} ({correlationData.period_start}–{correlationData.period_end}). {t('ndvi.correlationCaveat')}
+            </p>
+          </>
+        )}
+      </section>
 
       <div className="glass-panel" style={{ height: '400px' }}>
         <Line data={chartData} options={chartOptions} />

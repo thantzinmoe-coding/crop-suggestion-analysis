@@ -6,7 +6,11 @@ from pymongo import AsyncMongoClient
 from app.core.config import get_settings
 
 settings = get_settings()
-client = AsyncMongoClient(settings.mongodb_url)
+client = AsyncMongoClient(
+    settings.mongodb_url,
+    serverSelectionTimeoutMS=5_000,
+    connectTimeoutMS=5_000,
+)
 database = client[settings.database_name]
 
 

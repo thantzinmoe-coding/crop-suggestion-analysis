@@ -1,0 +1,104 @@
+name: greenvista
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_ENABLE_API: "true"
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./fastapi
+      dockerfile: Dockerfile
+    environment:
+      AGROGUARD_ENVIRONMENT: production
+      AGROGUARD_DEBUG: "false"
+      AGROGUARD_MONGODB_URL: mongodb://mongo:27017
+      AGROGUARD_DATABASE_NAME: ${AGROGUARD_DATABASE_NAME:-greenvista}
+      AGROGUARD_INITIALIZE_DATABASE: "true"
+      AGROGUARD_CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
+      AGROGUARD_LLM_ENDPOINT: ${AGROGUARD_LLM_ENDPOINT:-http://ollama:11434/v1}
+      AGROGUARD_LLM_MODEL: ${AGROGUARD_LLM_MODEL:-gemma3:1b}
+      AGROGUARD_LLM_API_KEY: ${AGROGUARD_LLM_API_KEY:-}
+      AGROGUARD_OPENWEATHER_API_KEY: ${AGROGUARD_OPENWEATHER_API_KEY:-}
+      AGROGUARD_CDSE_ENABLED: ${AGROGUARD_CDSE_ENABLED:-false}
+      AGROGUARD_CDSE_CLIENT_ID: ${AGROGUARD_CDSE_CLIENT_ID:-}
+      AGROGUARD_CDSE_CLIENT_SECRET: ${AGROGUARD_CDSE_CLIENT_SECRET:-}
+      AGROGUARD_SMTP_HOST: ${AGROGUARD_SMTP_HOST:-}
+      AGROGUARD_SMTP_PORT: ${AGROGUARD_SMTP_PORT:-587}
+      AGROGUARD_SMTP_USERNAME: ${AGROGUARD_SMTP_USERNAME:-}
+      AGROGUARD_SMTP_PASSWORD: ${AGROGUARD_SMTP_PASSWORD:-}
+      AGROGUARD_SMTP_FROM_EMAIL: ${AGROGUARD_SMTP_FROM_EMAIL:-}
+      AGROGUARD_SMTP_USE_TLS: ${AGROGUARD_SMTP_USE_TLS:-true}
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:8.0
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      app-network:
+        aliases:
+          - mongo
+
+  ollama:
+    image: ollama/ollama:0.11.4
+    volumes:
+      - ${OLLAMA_DATA_PATH:-ollama-data}:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      app-network:
+        aliases:
+          - ollama
+
+  ollama-init:
+    image: ollama/ollama:0.11.4
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull ${AGROGUARD_LLM_MODEL:-gemma3:1b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+  ollama-data:
+
+networks:
+  app-network:
+    driver: bridge

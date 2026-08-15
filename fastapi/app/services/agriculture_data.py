@@ -1,6 +1,7 @@
 from functools import lru_cache
 import json
 from pathlib import Path
+import re
 
 import pandas as pd
 
@@ -252,4 +253,110 @@ def ndvi_rainfall_correlation() -> dict:
         ],
         "rainfall_mm": [round(float(rainfall.get(month, 0)), 2) for month in months],
         "ndvi_index": [round(float(vegetation.get(month, 0)), 4) for month in months],
+    }
+
+
+def _location_key(value: object) -> str:
+    key = re.sub(r"[^a-z0-9]", "", str(value).strip().casefold())
+    return {"naypyidaw": "naypyitaw"}.get(key, key)
+
+
+@lru_cache(maxsize=1)
+def load_township_admin_lookup() -> dict[str, dict[str, str]]:
+    """Map names in the township dataset to official district/state PCODEs."""
+    path = DATA_DIR / "mmr_admin_boundaries.xlsx"
+    try:
+        boundaries = pd.read_excel(
+            path,
+            sheet_name="mmr_admin3",
+            usecols=[
+                "adm3_name",
+                "adm3_pcode",
+                "adm2_name",
+                "adm2_pcode",
+                "adm1_name",
+                "adm1_pcode",
+            ],
+        )
+        lookup: dict[str, dict[str, str]] = {}
+        for level in ("adm3_name", "adm2_name", "adm1_name"):
+            for _, row in boundaries.drop_duplicates(level).iterrows():
+                key = _location_key(row[level])
+                if key:
+                    lookup.setdefault(
+                        key,
+                        {
+                            "district_pcode": str(row["adm2_pcode"]).strip(),
+                            "state_pcode": str(row["adm1_pcode"]).strip(),
+                        },
+                    )
+        return lookup
+    except (OSError, ImportError, KeyError, ValueError):
+        return {}
+
+
+def ndvi_environment_correlation(pcode: str | None = None) -> dict:
+    """Correlate monthly NDVI with soil pH, rainfall, and temperature records."""
+    township = load_township_data().copy()
+    ndvi = get_ndvi_data().copy()
+    normalized_pcode = str(pcode or "").strip()
+    if normalized_pcode:
+        selected_ndvi = ndvi[ndvi["PCODE"] == normalized_pcode].copy()
+    else:
+        selected_ndvi = ndvi
+    if selected_ndvi.empty:
+        raise AgricultureDatasetError(
+            f"No NDVI observations are available for region {normalized_pcode}"
+        )
+
+    lookup = load_township_admin_lookup()
+    township["admin_codes"] = township["township"].map(
+        lambda name: lookup.get(_location_key(name))
+    )
+    mapped = township[township["admin_codes"].notna()].copy()
+    if not mapped.empty:
+        mapped["state_pcode"] = mapped["admin_codes"].map(
+            lambda codes: codes["state_pcode"]
+        )
+        mapped["district_pcode"] = mapped["admin_codes"].map(
+            lambda codes: codes["district_pcode"]
+        )
+
+    local_environment = mapped
+    if normalized_pcode:
+        code_column = "district_pcode" if "D" in normalized_pcode else "state_pcode"
+        local_environment = mapped[mapped[code_column] == normalized_pcode]
+    scope = "regional"
+    environment = local_environment
+    if environment.empty:
+        environment = township
+        scope = "national_reference"
+    environment = environment.copy()
+
+    factor_columns = ["soil_pH", "rainfall_mm", "temperature_c"]
+    for column in factor_columns:
+        environment[column] = pd.to_numeric(environment[column], errors="coerce")
+    environment["period"] = environment["date"].dt.to_period("M")
+    selected_ndvi["period"] = selected_ndvi["date"].dt.tz_localize(None).dt.to_period("M")
+    monthly_environment = environment.groupby("period", as_index=False)[factor_columns].mean()
+    monthly_ndvi = selected_ndvi.groupby("period", as_index=False)["vim"].mean()
+    paired = monthly_ndvi.merge(monthly_environment, on="period", how="inner").dropna()
+    if len(paired) < 3:
+        raise AgricultureDatasetError(
+            f"Not enough overlapping environmental and NDVI observations for {normalized_pcode or 'Myanmar'}"
+        )
+
+    correlations: dict[str, float | None] = {}
+    for column in factor_columns:
+        coefficient = paired["vim"].corr(paired[column])
+        correlations[column] = (
+            None if pd.isna(coefficient) else round(float(coefficient), 3)
+        )
+    return {
+        "pcode": normalized_pcode or None,
+        "scope": scope,
+        "sample_count": int(len(paired)),
+        "period_start": str(paired["period"].min()),
+        "period_end": str(paired["period"].max()),
+        "correlations": correlations,
     }

@@ -3,6 +3,7 @@ import axios from 'axios'
 import {
   Droplets,
   FlaskConical,
+  MapPin,
   Search,
   Sprout,
   Sun,
@@ -150,6 +151,26 @@ export default function CropRequirements() {
               <div><Droplets size={19} /><span>{t('requirements.humidity')}</span><strong>{result.averageHumidityPct}%</strong></div>
               <div><Sun size={19} /><span>{t('requirements.light')}</span><strong>{result.lightIntensity}</strong></div>
             </div>
+            {result.suitableRegions?.length > 0 && (
+              <div className="crop-suitable-regions">
+                <div className="crop-suitable-regions-heading">
+                  <MapPin size={19} />
+                  <div>
+                    <h4>{t('requirements.suitableRegions')}</h4>
+                    <p>{t('requirements.suitableRegionsHint')}</p>
+                  </div>
+                </div>
+                <div className="crop-suitable-region-list">
+                  {result.suitableRegions.map((region) => (
+                    <div className="crop-suitable-region" key={region.regionKey}>
+                      <span>{region.region}</span>
+                      <strong>{region.suitabilityPercent}{t('requirements.matchSuffix')}</strong>
+                    </div>
+                  ))}
+                </div>
+                <p className="crop-region-caveat">{t('requirements.regionCaveat')}</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="crop-requirements-empty"><Sun size={54} /><p>{t('requirements.empty')}</p></div>

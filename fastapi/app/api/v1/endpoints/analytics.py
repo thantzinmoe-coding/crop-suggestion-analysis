@@ -6,6 +6,7 @@ from app.services.agriculture_data import (
     dashboard_data,
     dataset_summary,
     ndvi_rainfall_correlation,
+    ndvi_environment_correlation,
     ndvi_regions,
     ndvi_boundaries,
     ndvi_series,
@@ -57,3 +58,8 @@ def get_ndvi_boundaries():
 @router.get("/ndvi-rainfall-correlation")
 def get_ndvi_rainfall_correlation():
     return _run(ndvi_rainfall_correlation)
+
+
+@router.get("/ndvi-environment-correlation")
+def get_ndvi_environment_correlation(pcode: str | None = Query(default=None)):
+    return _run(lambda: ndvi_environment_correlation(pcode))

@@ -21,12 +21,14 @@ dependencies = [
     "truststore>=0.10,<1.0",
     "scikit-learn>=1.7,<1.8",
     "uvicorn[standard]>=0.34,<1.0",
+]
+
+[project.optional-dependencies]
+vision = [
     "torch>=2.0.0",
     "torchvision>=0.15.0",
     "Pillow>=9.0.0",
 ]
-
-[project.optional-dependencies]
 dev = [
     "pytest>=8,<10",
     "pytest-asyncio>=0.25,<2.0",

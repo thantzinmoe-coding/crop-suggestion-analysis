@@ -8,8 +8,12 @@ PRICE_MERGED_PATH = Path(__file__).resolve().parents[1] / "data" / "price_datase
 CRITERIA_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "crop_dataset (1)_aligned.xls"
 MYANMAR_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "crop_dataset_mm.xls"
 PLANT_DETAILS_PATH = Path(__file__).resolve().parents[1] / "data" / "plants.csv"
+ADMIN_BOUNDARIES_PATH = (
+    Path(__file__).resolve().parents[1] / "data" / "mmr_admin_boundaries.xlsx"
+)
 NAME_ALIASES = {
     "corn (maize)": "corn",
+    "rice (paddy)": "rice",
     "tea leaf": "tealeaf",
     "betel nut (areca palm)": "betel nut",
     "morning glory (water spinach)": "morning glory",
@@ -37,6 +41,128 @@ def _average(low: object, high: object) -> float:
 def _name_key(value: object) -> str:
     key = re.sub(r"\s+", " ", str(value).strip().casefold())
     return NAME_ALIASES.get(key, key)
+
+
+def _location_key(value: object) -> str:
+    key = re.sub(r"[^a-z0-9]", "", str(value).strip().casefold())
+    return {"naypyidaw": "naypyitaw"}.get(key, key)
+
+
+def _range_fit(value: float, low: float, high: float) -> float:
+    if low <= value <= high:
+        return 100.0
+    distance = low - value if value < low else value - high
+    tolerance = max(high - low, abs((low + high) / 2) * 0.25, 1.0)
+    return max(0.0, 100.0 - (distance / tolerance * 100.0))
+
+
+@lru_cache(maxsize=1)
+def _load_regional_agriculture() -> pd.DataFrame:
+    """Join township climate/history records to official Myanmar admin regions."""
+    if not TOWNSHIP_DATA_PATH.is_file() or not ADMIN_BOUNDARIES_PATH.is_file():
+        return pd.DataFrame()
+    try:
+        history = pd.read_csv(TOWNSHIP_DATA_PATH)
+        boundaries = pd.read_excel(ADMIN_BOUNDARIES_PATH, sheet_name="mmr_admin3")
+        required_history = {
+            "township",
+            "soil_pH",
+            "rainfall_mm",
+            "temperature_c",
+            "best_crop",
+        }
+        required_boundaries = {
+            "adm3_name",
+            "adm2_name",
+            "adm1_name",
+            "adm1_name1",
+        }
+        if not required_history.issubset(history.columns) or not required_boundaries.issubset(
+            boundaries.columns
+        ):
+            return pd.DataFrame()
+
+        location_lookup: dict[str, tuple[str, str]] = {}
+        for level in ("adm3_name", "adm2_name", "adm1_name"):
+            for _, boundary in boundaries.drop_duplicates(level).iterrows():
+                key = _location_key(boundary[level])
+                if key:
+                    name_my = str(boundary.get("adm1_name1", "")).strip()
+                    if name_my.casefold() == "nan":
+                        name_my = str(boundary["adm1_name"]).strip()
+                    location_lookup.setdefault(
+                        key,
+                        (str(boundary["adm1_name"]).strip(), name_my),
+                    )
+
+        history["region_names"] = history["township"].map(
+            lambda value: location_lookup.get(_location_key(value))
+        )
+        history = history[history["region_names"].notna()].copy()
+        if history.empty:
+            return history
+        history["region_name_en"] = history["region_names"].map(lambda names: names[0])
+        history["region_name_my"] = history["region_names"].map(lambda names: names[1])
+        history["crop_key"] = history["best_crop"].map(_name_key)
+        for column in ("soil_pH", "rainfall_mm", "temperature_c"):
+            history[column] = pd.to_numeric(history[column], errors="coerce")
+        return history.dropna(subset=["soil_pH", "rainfall_mm", "temperature_c"])
+    except (OSError, ValueError, KeyError, ImportError):
+        return pd.DataFrame()
+
+
+def _suitable_regions(plant: pd.Series, language: str) -> list[dict[str, object]]:
+    history = _load_regional_agriculture()
+    if history.empty:
+        return []
+
+    crop_key = str(plant["crop_key"])
+    has_crop_history = bool(history["crop_key"].eq(crop_key).any())
+    candidates: list[dict[str, object]] = []
+    for region_name_en, records in history.groupby("region_name_en"):
+        temperature_fit = _range_fit(
+            float(records["temperature_c"].median()),
+            float(plant["lowest_temp"]),
+            float(plant["highest_temp"]),
+        )
+        rainfall_fit = _range_fit(
+            float(records["rainfall_mm"].median()),
+            float(plant["rainfall_min"]),
+            float(plant["rainfall_max"]),
+        )
+        ph_fit = _range_fit(
+            float(records["soil_pH"].median()),
+            float(plant["soil_ph_min"]),
+            float(plant["soil_ph_max"]),
+        )
+        climate_fit = temperature_fit * 0.4 + rainfall_fit * 0.35 + ph_fit * 0.25
+        historical_records = int(records["crop_key"].eq(crop_key).sum())
+        score = climate_fit
+        if has_crop_history:
+            historical_share = historical_records / len(records)
+            history_fit = min(100.0, historical_share * 300.0)
+            score = climate_fit * 0.7 + history_fit * 0.3
+
+        name_my = str(records["region_name_my"].iloc[0])
+        candidates.append(
+            {
+                "region": name_my if language == "my" else str(region_name_en),
+                "region_key": str(region_name_en),
+                "suitability_percent": round(min(max(score, 0.0), 100.0), 1),
+                "data_records": int(len(records)),
+                "historical_crop_records": historical_records,
+            }
+        )
+
+    candidates.sort(
+        key=lambda item: (
+            -float(item["suitability_percent"]),
+            -int(item["historical_crop_records"]),
+            str(item["region_key"]),
+        )
+    )
+    suitable = [item for item in candidates if float(item["suitability_percent"]) >= 60]
+    return (suitable or candidates[:3])[:5]
 
 
 @lru_cache(maxsize=1)
@@ -150,6 +276,7 @@ def search_crop_requirements(
                     plant["humidity_min"], plant["humidity_max"]
                 ),
                 "light_intensity": light,
+                "suitable_regions": _suitable_regions(plant, language),
             }
         )
 

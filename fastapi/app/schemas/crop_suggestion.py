@@ -53,6 +53,14 @@ class PlantSuggestionResponse(APIModel):
     recommendations: list[PlantRecommendation]
 
 
+class SuitableRegion(APIModel):
+    region: str
+    region_key: str
+    suitability_percent: float = Field(ge=0, le=100)
+    data_records: int = Field(ge=0)
+    historical_crop_records: int = Field(ge=0)
+
+
 class CropRequirement(APIModel):
     crop: str
     crop_key: str
@@ -61,3 +69,4 @@ class CropRequirement(APIModel):
     average_soil_ph: float
     average_humidity_pct: float
     light_intensity: str
+    suitable_regions: list[SuitableRegion]

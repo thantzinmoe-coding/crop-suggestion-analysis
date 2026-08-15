@@ -3,6 +3,40 @@
 GreenVista is a React frontend and FastAPI backend for agricultural crop suggestions,
 field-health analysis, weather data, and NDVI analysis.
 
+## Run everything with Docker
+
+Docker Compose starts the production frontend, FastAPI backend, MongoDB, and a local
+Ollama server. No local Node.js, Python, MongoDB, or Ollama installation is required.
+
+```powershell
+Copy-Item docker.env.example .env
+docker compose up --build
+```
+
+Open `http://localhost:5173`. The API documentation is available at
+`http://localhost:8000/docs`.
+
+The first startup downloads the `gemma3:1b` model and can take several minutes. The web
+application becomes available while that download continues; AI Chat becomes available
+when it finishes. MongoDB and Ollama model data are retained in named Docker volumes.
+Later startups can use:
+
+```powershell
+docker compose up -d
+```
+
+Stop the application with `docker compose down`. To also permanently remove the local
+database and downloaded model, use `docker compose down --volumes`.
+
+All settings in `docker.env.example` are optional. To use an external OpenAI-compatible
+provider instead of the bundled Ollama endpoint, set `AGROGUARD_LLM_ENDPOINT`,
+`AGROGUARD_LLM_MODEL`, and optionally `AGROGUARD_LLM_API_KEY` in the root `.env` file,
+then start only the services that are needed:
+
+```powershell
+docker compose up --build frontend backend mongo
+```
+
 ## Requirements
 
 - Node.js 18+
