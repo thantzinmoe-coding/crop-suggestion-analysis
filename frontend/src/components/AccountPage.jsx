@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import { Heart, MapPin, Pencil, Save, Sprout, UserRound } from 'lucide-react'
+import { CircleAlert, Heart, MapPin, Pencil, Save, Sprout, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { accountRequest } from '../accountApi.js'
 import { API_BASE_URL } from '../api.js'
@@ -149,17 +149,17 @@ export default function AccountPage() {
 
   if (!currentUser) return null
   if (!profileLoaded) return (
-    <div className="account-page">
+    <div className={`account-page ${language === 'my' ? 'language-my' : ''}`}>
       <div className="account-page-heading"><div><p className="ndvi-controls-kicker">{t('account.kicker') || 'FARMER ACCOUNT'}</p><h1>{t('account.title') || 'My farm workspace'}</h1><p>{t('account.subtitle') || 'Save your farm context and return to useful analysis faster.'}</p></div><UserRound size={44} aria-hidden="true" /></div>
       <section className="glass-panel account-card"><p className="account-empty">{t('common.loading') || 'Loading your workspace...'}</p></section>
     </div>
   )
 
   return (
-    <div className="account-page">
+    <div className={`account-page ${language === 'my' ? 'language-my' : ''}`}>
       <div className="account-page-heading"><div><p className="ndvi-controls-kicker">{t('account.kicker') || 'FARMER ACCOUNT'}</p><h1>{t('account.title') || 'My farm workspace'}</h1><p>{t('account.subtitle') || 'Save your farm context and return to useful analysis faster.'}</p></div><UserRound size={44} aria-hidden="true" /></div>
       {message && <p className="account-message">{message}</p>}
-      {error && <p className="crop-suggestion-error" role="alert">{error}</p>}
+      {error && <div className="account-error" role="alert"><CircleAlert size={19} aria-hidden="true" /><span>{error}</span></div>}
 
       {editingProfile ? (
         <form className="glass-panel account-card account-profile-setup" onSubmit={updateProfile}>

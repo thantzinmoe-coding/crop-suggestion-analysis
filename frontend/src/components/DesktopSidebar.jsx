@@ -29,12 +29,6 @@ function DesktopSidebar() {
         <span>GREEN<strong>VISTA</strong></span>
       </Link>
 
-      <div className="gv-sidebar-intro">
-        <p>{t('nav.workspace')}</p>
-        <h2>{t('nav.farmIntelligence')}</h2>
-        <span>{t('nav.sidebarDescription')}</span>
-      </div>
-
       <nav className="gv-sidebar-nav" aria-label={t('nav.workspaceNavigation')}>
         {navItems.map(({ key, icon: Icon, path }) => (
           <NavLink key={path} to={path} end={path === '/'}>
@@ -50,24 +44,25 @@ function DesktopSidebar() {
           <button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button>
           <button type="button" className={language === 'my' ? 'active' : ''} onClick={() => setLanguage('my')}>MY</button>
         </div>
-        {currentUser ? (
-          <>
-            {currentUser.email && <p className="gv-sidebar-email" title={currentUser.email}>{currentUser.email}</p>}
-            <button className="gv-sidebar-signout mb-3" type="button" onClick={() => navigate('/account')}>
-              <UserRound size={17} aria-hidden="true" />
-              {t('account.title') || 'My account'}
+        <div className="gv-sidebar-actions">
+          {currentUser ? (
+            <>
+              <NavLink className="gv-sidebar-action gv-sidebar-account" to="/account">
+                <UserRound size={17} aria-hidden="true" />
+                {t('account.farmProfile') || 'Farm profile'}
+              </NavLink>
+              <button className="gv-sidebar-action gv-sidebar-signout" type="button" onClick={handleLogout}>
+                <LogOut size={17} aria-hidden="true" />
+                {t('auth.logout') || 'Sign out'}
+              </button>
+            </>
+          ) : (
+            <button className="gv-sidebar-action gv-sidebar-login" type="button" onClick={() => navigate('/?auth=signin')}>
+              <LogIn size={17} aria-hidden="true" />
+              {t('auth.loginBtn') || 'Sign in'}
             </button>
-            <button className="gv-sidebar-signout" type="button" onClick={handleLogout}>
-              <LogOut size={17} aria-hidden="true" />
-              {t('auth.logout') || 'Sign out'}
-            </button>
-          </>
-        ) : (
-          <button className="gv-sidebar-signout" type="button" onClick={() => navigate('/?auth=signin')}>
-            <LogIn size={17} aria-hidden="true" />
-            {t('auth.loginBtn') || 'Sign in'}
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </aside>
   )

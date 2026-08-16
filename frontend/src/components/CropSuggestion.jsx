@@ -357,18 +357,11 @@ export default function CropSuggestion() {
     <div className={`crop-suggestion ${language === 'my' ? 'language-my' : ''}`}>
       <section className="crop-page-hero" aria-labelledby="crop-page-title">
         <div className="crop-page-hero-copy">
-          <p className="crop-page-eyebrow"><Sparkles size={15} /> {t('crop.pageEyebrow')}</p>
           <h1 id="crop-page-title">
             {language === 'my' ? 'သင့်လယ်ကွင်းအတွက် သင့်တော်သော သီးနှံကို ရွေးချယ်ပါ။' : 'Choose what grows best here.'}
           </h1>
           <p>{t('crop.subtitle')}</p>
-          <div className="crop-page-benefits" aria-label={t('crop.plannerBenefits')}>
-            <span><Satellite size={16} /> {t('crop.benefitSatellite')}</span>
-            <span><Leaf size={16} /> {t('crop.benefitLocal')}</span>
-            <span><Sprout size={16} /> {t('crop.benefitGuidance')}</span>
-          </div>
         </div>
-        <Sprout className="crop-page-hero-art" size={250} strokeWidth={0.7} aria-hidden="true" />
       </section>
 
       <div className="crop-planner-grid">

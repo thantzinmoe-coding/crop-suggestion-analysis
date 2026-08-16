@@ -119,6 +119,7 @@ function LandingPage() {
   const { language, setLanguage, t } = useLanguage()
   const lt = (key) => landingText[language]?.[key] || landingText.en[key] || key
   const [authMode, setAuthMode] = useState(null)
+  const [isExploring, setIsExploring] = useState(false)
 
   useEffect(() => {
     const mode = new URLSearchParams(location.search).get('auth')
@@ -133,6 +134,14 @@ function LandingPage() {
   const closeAuth = () => {
     setAuthMode(null)
     if (location.search.includes('auth=')) navigate('/', { replace: true })
+  }
+
+  const exploreField = () => {
+    if (isExploring) return
+
+    setIsExploring(true)
+    const feedbackDelay = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 220
+    window.setTimeout(() => openWorkspace('signup', '/crop-suggestion'), feedbackDelay)
   }
 
   return (
@@ -159,7 +168,14 @@ function LandingPage() {
             <a href="#platform">{lt('navPlatform')}</a>
             <a href="#process">{lt('navProcess')}</a>
             <a href="#impact">{lt('navImpact')}</a>
-            <button className="agro-nav-explore" type="button" onClick={() => openWorkspace('signup', '/crop-suggestion')}>{lt('navExplore')}</button>
+            <button
+              className={`agro-nav-explore${isExploring ? ' is-selected' : ''}`}
+              type="button"
+              aria-busy={isExploring}
+              onClick={exploreField}
+            >
+              {lt('navExplore')}
+            </button>
           </div>
 
           {currentUser ? (
@@ -236,7 +252,6 @@ function LandingPage() {
         </figure>
 
         <div className="agro-process-copy">
-          <p className="agro-eyebrow">{lt('processEyebrow')}</p>
           <h2>
             <span>{lt('processTitle')}</span>
           </h2>

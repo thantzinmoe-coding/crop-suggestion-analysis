@@ -286,9 +286,9 @@ export default function NDVIAnalysis() {
   };
 
   return (
-    <div className="ndvi-analysis">
-      <h2 className="m-0 text-xl font-semibold"><Satellite size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '10px' }}/> {t('ndvi.title')}</h2>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+    <div className={`ndvi-analysis ${language === 'my' ? 'language-my' : ''}`}>
+      <h2 className="ndvi-page-title"><Satellite size={28} aria-hidden="true" /> <span>{t('ndvi.title')}</span></h2>
+      <p className="ndvi-page-subtitle">
         {t('ndvi.subtitle')}
       </p>
 

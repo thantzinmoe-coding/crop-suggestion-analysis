@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Bot, Clock3, History, MessageCircle, Plus, Send, Sparkles, Trash2, User } from 'lucide-react'
+import { Bot, Clock3, MessageCircle, PanelLeft, Plus, Send, Sparkles, Trash2, User } from 'lucide-react'
 import { accountRequest } from '../accountApi.js'
 import { API_BASE_URL } from '../api'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -56,6 +56,7 @@ export default function AIChat() {
   const [activeConversationId, setActiveConversationId] = useState(null)
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState('')
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const messagesEndRef = useRef(null)
   const streamedTextRef = useRef('')
   const activeConversationIdRef = useRef(null)
@@ -247,37 +248,52 @@ export default function AIChat() {
   ]
 
   return (
-    <div className="chat-workspace">
-      <aside className="chat-history-panel" aria-label={t('chat.history')}>
-        <div className="chat-history-heading">
-          <div><History size={18} /><strong>{t('chat.history')}</strong></div>
-          <button type="button" onClick={startNewChat} disabled={isTyping}><Plus size={17} /> {t('chat.newChat')}</button>
-        </div>
-
-        {!currentUser && <p className="chat-history-empty">{t('chat.signInHistory')}</p>}
-        {historyLoading ? (
-          <p className="chat-history-empty">{t('common.loading')}</p>
-        ) : conversations.length ? (
-          <div className="chat-history-list">
-            {conversations.map((conversation) => (
-              <div className={conversation.id === activeConversationId ? 'active' : ''} key={conversation.id}>
-                <button type="button" className="chat-history-open" onClick={() => openConversation(conversation)} disabled={isTyping}>
-                  <strong>{conversation.title}</strong>
-                  <span><Clock3 size={12} /> {conversation.updatedAt ? new Date(conversation.updatedAt).toLocaleDateString(language === 'my' ? 'my-MM' : 'en-US') : ''}</span>
-                </button>
-                <button type="button" className="chat-history-delete" aria-label={t('chat.deleteChat')} onClick={() => deleteConversation(conversation.id)}><Trash2 size={15} /></button>
-              </div>
-            ))}
+    <div className={`chat-workspace ${isHistoryOpen ? 'history-open' : ''}`}>
+      <aside className={`chat-history-panel ${isHistoryOpen ? 'is-open' : ''}`}>
+        <div id="chat-history-content" className="chat-history-content" aria-hidden={!isHistoryOpen} inert={!isHistoryOpen ? true : undefined}>
+          <strong className="chat-history-title">{t('chat.history')}</strong>
+          <div className="chat-history-heading">
+            <button type="button" onClick={startNewChat} disabled={isTyping}><Plus size={17} /> {t('chat.newChat')}</button>
           </div>
-        ) : (
-          <p className="chat-history-empty">{t('chat.noHistory')}</p>
-        )}
-        {historyError && <p className="chat-history-error" role="alert">{historyError}</p>}
+
+          {!currentUser && <p className="chat-history-empty">{t('chat.signInHistory')}</p>}
+          {historyLoading ? (
+            <p className="chat-history-empty">{t('common.loading')}</p>
+          ) : conversations.length ? (
+            <div className="chat-history-list">
+              {conversations.map((conversation) => (
+                <div className={conversation.id === activeConversationId ? 'active' : ''} key={conversation.id}>
+                  <button type="button" className="chat-history-open" onClick={() => openConversation(conversation)} disabled={isTyping}>
+                    <strong>{conversation.title}</strong>
+                    <span><Clock3 size={12} /> {conversation.updatedAt ? new Date(conversation.updatedAt).toLocaleDateString(language === 'my' ? 'my-MM' : 'en-US') : ''}</span>
+                  </button>
+                  <button type="button" className="chat-history-delete" aria-label={t('chat.deleteChat')} onClick={() => deleteConversation(conversation.id)}><Trash2 size={15} /></button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="chat-history-empty">{t('chat.noHistory')}</p>
+          )}
+          {historyError && <p className="chat-history-error" role="alert">{historyError}</p>}
+        </div>
       </aside>
 
       <div className="chat-container">
         <div className="chat-header">
-          <h2 className="m-0 text-xl font-semibold"><MessageCircle size={28} /> {activeConversationId ? conversations.find((item) => item.id === activeConversationId)?.title || t('chat.title') : t('chat.title')}</h2>
+          <div className="chat-header-title">
+            <button
+              type="button"
+              className="chat-history-toggle"
+              aria-expanded={isHistoryOpen}
+              aria-controls="chat-history-content"
+              aria-label={t('chat.history')}
+              title={t('chat.history')}
+              onClick={() => setIsHistoryOpen((open) => !open)}
+            >
+              <PanelLeft size={21} aria-hidden="true" />
+            </button>
+            <h2 className="m-0 text-xl font-semibold"><MessageCircle size={28} /> {activeConversationId ? conversations.find((item) => item.id === activeConversationId)?.title || t('chat.title') : t('chat.title')}</h2>
+          </div>
           <div className="llm-badge"><Sparkles size={14} /> {t('chat.powered')}</div>
         </div>
 

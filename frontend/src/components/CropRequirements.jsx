@@ -99,7 +99,6 @@ export default function CropRequirements() {
   return (
     <div className={`crop-library-page ${language === 'my' ? 'language-my' : ''}`}>
       <section className="crop-library-hero" aria-labelledby="crop-library-title">
-        <p className="crop-page-eyebrow"><Sprout size={16} /> {t('requirements.eyebrow')}</p>
         <h1 id="crop-library-title">{t('requirements.pageTitle')}</h1>
         <p>{t('requirements.pageSubtitle')}</p>
       </section>
