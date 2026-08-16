@@ -5,6 +5,47 @@ import { API_BASE_URL } from '../api'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useLanguage } from '../contexts/LanguageContext'
 
+const CHAT_HISTORY_PREFIX = 'greenvista_chat_history'
+const MAX_LOCAL_CONVERSATIONS = 50
+
+function historyStorageKey(currentUser) {
+  return `${CHAT_HISTORY_PREFIX}:${currentUser?.id || currentUser?.email || 'guest'}`
+}
+
+function readLocalHistory(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || '[]')
+    return Array.isArray(value) ? value : []
+  } catch {
+    return []
+  }
+}
+
+function writeLocalHistory(key, conversations) {
+  try {
+    localStorage.setItem(key, JSON.stringify(conversations.slice(0, MAX_LOCAL_CONVERSATIONS)))
+  } catch (error) {
+    console.error('Local chat history save error:', error)
+  }
+}
+
+function mergeConversations(primary, fallback) {
+  const merged = new Map()
+  for (const conversation of [...primary, ...fallback]) {
+    if (conversation?.id && !merged.has(conversation.id)) merged.set(conversation.id, conversation)
+  }
+  return [...merged.values()]
+    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+    .slice(0, MAX_LOCAL_CONVERSATIONS)
+}
+
+function displayMessage(content) {
+  return content
+    .replace(/\*\*/g, '')
+    .replace(/(^|\n)#{1,6}\s*/g, '$1')
+    .replace(/\s+\*\s+/g, '\n• ')
+}
+
 export default function AIChat() {
   const { t, language } = useLanguage()
   const { currentUser } = useAuth()
@@ -17,8 +58,19 @@ export default function AIChat() {
   const [historyError, setHistoryError] = useState('')
   const messagesEndRef = useRef(null)
   const streamedTextRef = useRef('')
+  const activeConversationIdRef = useRef(null)
+  const storageKey = historyStorageKey(currentUser)
+
+  const storeConversations = useCallback((update) => {
+    setConversations((items) => {
+      const next = typeof update === 'function' ? update(items) : update
+      writeLocalHistory(storageKey, next)
+      return next
+    })
+  }, [storageKey])
 
   const startNewChat = useCallback(() => {
+    activeConversationIdRef.current = null
     setActiveConversationId(null)
     setMessages([{ role: 'assistant', content: t('chat.welcome') }])
     setInput('')
@@ -32,44 +84,68 @@ export default function AIChat() {
   }, [language])
 
   useEffect(() => {
-    if (!currentUser) {
-      setConversations([])
-      setActiveConversationId(null)
-      return
-    }
+    const localConversations = readLocalHistory(storageKey)
+    setConversations(localConversations)
+    activeConversationIdRef.current = null
+    setActiveConversationId(null)
+    if (!currentUser) return
+
     setHistoryLoading(true)
     setHistoryError('')
     accountRequest('/account/chat-conversations')
-      .then((items) => setConversations(items || []))
-      .catch(() => setHistoryError(t('chat.historyError')))
+      .then((items) => {
+        const merged = mergeConversations(items || [], localConversations)
+        setConversations(merged)
+        writeLocalHistory(storageKey, merged)
+      })
+      .catch(() => {
+        setConversations(localConversations)
+        setHistoryError(t('chat.historyError'))
+      })
       .finally(() => setHistoryLoading(false))
-  }, [currentUser])
+  }, [currentUser, storageKey, t])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isTyping])
 
   const persistConversation = async (completedMessages) => {
-    if (!currentUser) return
     const storedMessages = completedMessages.filter((message) => message.content.trim())
     const firstQuestion = storedMessages.find((message) => message.role === 'user')?.content || t('chat.newChat')
     const title = firstQuestion.length > 54 ? `${firstQuestion.slice(0, 54).trim()}…` : firstQuestion
     const payload = { title, language, messages: storedMessages }
+    const now = new Date().toISOString()
+    const currentId = activeConversationIdRef.current
+    const localId = currentId || `local-${crypto.randomUUID()}`
+    const localConversation = { ...payload, id: localId, createdAt: now, updatedAt: now }
+
+    activeConversationIdRef.current = localId
+    setActiveConversationId(localId)
+    storeConversations((items) => [
+      localConversation,
+      ...items.filter((item) => item.id !== localId),
+    ].slice(0, MAX_LOCAL_CONVERSATIONS))
+
+    if (!currentUser) return
 
     try {
-      if (activeConversationId) {
-        const updated = await accountRequest(`/account/chat-conversations/${activeConversationId}`, {
+      if (currentId && !currentId.startsWith('local-')) {
+        const updated = await accountRequest(`/account/chat-conversations/${currentId}`, {
           method: 'PUT',
           body: JSON.stringify(payload),
         })
-        setConversations((items) => [updated, ...items.filter((item) => item.id !== updated.id)])
+        storeConversations((items) => [updated, ...items.filter((item) => item.id !== updated.id)])
       } else {
         const created = await accountRequest('/account/chat-conversations', {
           method: 'POST',
           body: JSON.stringify(payload),
         })
+        activeConversationIdRef.current = created.id
         setActiveConversationId(created.id)
-        setConversations((items) => [created, ...items])
+        storeConversations((items) => [
+          created,
+          ...items.filter((item) => item.id !== localId && item.id !== created.id),
+        ])
       }
     } catch (error) {
       console.error('Chat history save error:', error)
@@ -138,6 +214,7 @@ export default function AIChat() {
 
   const openConversation = (conversation) => {
     if (isTyping) return
+    activeConversationIdRef.current = conversation.id
     setActiveConversationId(conversation.id)
     setMessages(conversation.messages || [])
     setHistoryError('')
@@ -145,10 +222,12 @@ export default function AIChat() {
 
   const deleteConversation = async (conversationId) => {
     if (!window.confirm(t('chat.deleteConfirm'))) return
+    storeConversations((items) => items.filter((item) => item.id !== conversationId))
+    if (activeConversationIdRef.current === conversationId) startNewChat()
+    if (!currentUser || conversationId.startsWith('local-')) return
+
     try {
       await accountRequest(`/account/chat-conversations/${conversationId}`, { method: 'DELETE' })
-      setConversations((items) => items.filter((item) => item.id !== conversationId))
-      if (activeConversationId === conversationId) startNewChat()
     } catch (error) {
       console.error('Chat history delete error:', error)
       setHistoryError(t('chat.deleteError'))
@@ -175,9 +254,8 @@ export default function AIChat() {
           <button type="button" onClick={startNewChat} disabled={isTyping}><Plus size={17} /> {t('chat.newChat')}</button>
         </div>
 
-        {!currentUser ? (
-          <p className="chat-history-empty">{t('chat.signInHistory')}</p>
-        ) : historyLoading ? (
+        {!currentUser && <p className="chat-history-empty">{t('chat.signInHistory')}</p>}
+        {historyLoading ? (
           <p className="chat-history-empty">{t('common.loading')}</p>
         ) : conversations.length ? (
           <div className="chat-history-list">
@@ -210,7 +288,7 @@ export default function AIChat() {
                 {message.role === 'user' ? <User size={20} color="white" /> : <Bot size={20} color="white" />}
               </div>
               <div className={`message-bubble ${message.role === 'user' ? 'user-bubble' : 'bot-bubble'} ${isTyping && index === messages.length - 1 && message.role === 'assistant' ? 'streaming-cursor' : ''}`}>
-                {message.content}
+                {displayMessage(message.content)}
               </div>
             </div>
           ))}

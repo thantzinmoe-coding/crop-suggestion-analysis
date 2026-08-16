@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     llm_api_key: SecretStr | None = None
     llm_endpoint: str = "http://localhost:11434/v1"
-    llm_model: str = "gemma3:latest"
+    llm_model: str = "gemma4:latest"
     openweather_api_key: SecretStr | None = None
     openweather_base_url: str = "https://api.openweathermap.org"
 

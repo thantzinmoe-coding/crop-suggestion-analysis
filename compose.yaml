@@ -28,8 +28,8 @@ services:
       AGROGUARD_DATABASE_NAME: ${AGROGUARD_DATABASE_NAME:-greenvista}
       AGROGUARD_INITIALIZE_DATABASE: "true"
       AGROGUARD_CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
-      AGROGUARD_LLM_ENDPOINT: ${AGROGUARD_LLM_ENDPOINT:-http://ollama:11434/v1}
-      AGROGUARD_LLM_MODEL: ${AGROGUARD_LLM_MODEL:-gemma3:1b}
+      AGROGUARD_LLM_ENDPOINT: ${AGROGUARD_LLM_ENDPOINT:-http://host.docker.internal:11434/v1}
+      AGROGUARD_LLM_MODEL: ${AGROGUARD_LLM_MODEL:-gemma4:latest}
       AGROGUARD_LLM_API_KEY: ${AGROGUARD_LLM_API_KEY:-}
       AGROGUARD_OPENWEATHER_API_KEY: ${AGROGUARD_OPENWEATHER_API_KEY:-}
       AGROGUARD_CDSE_ENABLED: ${AGROGUARD_CDSE_ENABLED:-false}
@@ -43,6 +43,10 @@ services:
       AGROGUARD_SMTP_USE_TLS: ${AGROGUARD_SMTP_USE_TLS:-true}
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./fastapi/app:/app/app:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       mongo:
         condition: service_healthy
@@ -66,38 +70,8 @@ services:
         aliases:
           - mongo
 
-  ollama:
-    image: ollama/ollama:0.11.4
-    volumes:
-      - ${OLLAMA_DATA_PATH:-ollama-data}:/root/.ollama
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 20s
-    restart: unless-stopped
-    networks:
-      app-network:
-        aliases:
-          - ollama
-
-  ollama-init:
-    image: ollama/ollama:0.11.4
-    environment:
-      OLLAMA_HOST: http://ollama:11434
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["ollama pull ${AGROGUARD_LLM_MODEL:-gemma3:1b}"]
-    depends_on:
-      ollama:
-        condition: service_healthy
-    restart: "no"
-    networks:
-      - app-network
-
 volumes:
   mongo-data:
-  ollama-data:
 
 networks:
   app-network:
